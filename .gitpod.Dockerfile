@@ -3,7 +3,7 @@ FROM gitpod/workspace-full
 # Install Haskell
 RUN curl -sSL https://get.haskellstack.org/ | sh
 
-# Install Node.js
+# Install Node.js 16
 RUN curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
 RUN sudo apt-get install -y nodejs
 

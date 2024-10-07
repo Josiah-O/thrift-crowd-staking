@@ -17,6 +17,8 @@ tasks:
 
   - init: |
       cd frontend
+      nvm install 16
+      nvm use 16
       npm install
     command: |
       cd frontend
