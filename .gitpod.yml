@@ -1,28 +1,19 @@
-image:
-  file: .gitpod.Dockerfile
+tasks:
+  - name: Backend Setup
+    init: cd backend && stack build
+    command: cd backend && stack run
+
+  - name: Frontend Setup
+    init: cd frontend && npm install
+    command: cd frontend && npm start
 
 ports:
-  - port: 8080
-    onOpen: open-preview
   - port: 3000
     onOpen: open-preview
-
-tasks:
-  - init: |
-      cd backend
-      stack build
-    command: |
-      cd backend
-      stack run
-
-  - init: |
-      cd frontend
-      npm install
-    command: |
-      cd frontend
-      npm start
+  - port: 8080
+    onOpen: open-preview
 
 vscode:
   extensions:
-    - justusadam.language-haskell
     - haskell.haskell
+    - dbaeumer.vscode-eslint
