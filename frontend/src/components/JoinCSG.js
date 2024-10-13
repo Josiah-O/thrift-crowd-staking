@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useWallet } from '../contexts/WalletContext';
 import { getCSG, joinCSG } from '../api/api';
-import { toast } from 'react-toastify';
+import toast from 'react-hot-toast';
 
 const JoinCSG = () => {
-  const { csgId } = useParams();
+  const params = useParams();
+  const csgId = params.csgId;
   const [csg, setCSG] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const { wallet } = useWallet();

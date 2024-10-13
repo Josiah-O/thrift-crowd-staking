@@ -2,9 +2,9 @@ name: thrift-crowd-staking
 version: 0.1.0.0
 github: "Josiah-O/thrift-crowd-staking"
 license: BSD3
-author: "Josiah"
+author: "Josiah Odosu"
 maintainer: "buildwithjosiah@gmail.com"
-copyright: "2024 Josiah"
+copyright: "2024 Josiah Odosu"
 
 description: Please see the README on GitHub at <https://github.com/Josiah-O/thrift-crowd-staking#readme>
 
@@ -16,23 +16,16 @@ dependencies:
 - warp
 - text
 - time
-- uuid
-- containers
-- mtl
-- wai-cors
-- postgresql-simple
-- resource-pool
-- cryptonite
-- bytestring
 - random
-- validation
+- postgresql-simple
+- uuid
 
 library:
   source-dirs: src
 
 executables:
   thrift-crowd-staking-exe:
-    main: src/Main.hs
+    main: Main.hs
     source-dirs: src
     ghc-options:
     - -threaded
@@ -41,3 +34,5 @@ executables:
     dependencies:
     - thrift-crowd-staking
 
+packages:
+- .

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useWallet } from '../contexts/WalletContext';
 import { listCSGs } from '../api/api';
-import { toast } from 'react-toastify';
+import toast from 'react-hot-toast';
 
 const MyCSGs = () => {
   const [csgs, setCSGs] = useState([]);
