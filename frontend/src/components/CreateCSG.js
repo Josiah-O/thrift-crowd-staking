@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useWallet } from '../contexts/WalletContext';
 import { createCSG } from '../api/api';
-import { toast } from 'react-toastify';
+import toast from 'react-hot-toast';
 
 const CreateCSG = () => {
   const [name, setName] = useState('');

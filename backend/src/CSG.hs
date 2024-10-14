@@ -1,52 +1,55 @@
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE OverloadedStrings #-}
 
-module CSG (
-    CSG(..),
-    CreateCSGRequest(..),
-    JoinCSGRequest(..),
-    ClaimRewardRequest(..),
-    WithdrawRequest(..),
-    -- other exports...
-) where
+module CSG where
 
-import GHC.Generics
-import Data.Aeson
+import Data.Text (Text)
+import Data.Time (UTCTime)
+import GHC.Generics (Generic)
+import Data.Aeson (ToJSON, FromJSON)
 
 data CSG = CSG
-    { csgId :: Int
-    , csgName :: String
-    , csgGoal :: Int
-    , csgDuration :: Int
-    , csgParticipants :: [String]
-    , csgTotalContribution :: Int
-    } deriving (Show, Generic)
-
-data CreateCSGRequest = CreateCSGRequest
-    { createName :: String
-    , createGoal :: Int
-    , createDuration :: Int
-    } deriving (Show, Generic)
-
-data JoinCSGRequest = JoinCSGRequest
-    { joinAmount :: Int
-    } deriving (Show, Generic)
-
-data ClaimRewardRequest = ClaimRewardRequest
-    { claimantId :: String
-    } deriving (Show, Generic)
-
-data WithdrawRequest = WithdrawRequest
-    { withdrawAmount :: Int
-    } deriving (Show, Generic)
+  { csgId :: Text
+  , csgName :: Text
+  , csgParticipants :: [Text]
+  , csgTotalStake :: Integer
+  , csgDuration :: Integer
+  , csgStartTime :: UTCTime
+  , csgEndTime :: UTCTime
+  , csgStatus :: Text
+  } deriving (Show, Generic)
 
 instance ToJSON CSG
 instance FromJSON CSG
+
+data CreateCSGRequest = CreateCSGRequest
+  { createCsgName :: Text
+  , createCsgDuration :: Integer
+  , createCsgStakeAmount :: Integer
+  } deriving (Show, Generic)
+
 instance ToJSON CreateCSGRequest
 instance FromJSON CreateCSGRequest
+
+data JoinCSGRequest = JoinCSGRequest
+  { joinStakeAmount :: Integer
+  } deriving (Show, Generic)
+
 instance ToJSON JoinCSGRequest
 instance FromJSON JoinCSGRequest
+
+data ClaimRewardRequest = ClaimRewardRequest
+  { claimantAddress :: Text
+  } deriving (Show, Generic)
+
 instance ToJSON ClaimRewardRequest
 instance FromJSON ClaimRewardRequest
+
+data WithdrawRequest = WithdrawRequest
+  { withdrawAmount :: Integer
+  , withdrawAddress :: Text
+  } deriving (Show, Generic)
+
 instance ToJSON WithdrawRequest
 instance FromJSON WithdrawRequest
 

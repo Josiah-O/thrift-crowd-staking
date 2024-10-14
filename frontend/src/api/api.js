@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { toast } from 'react-toastify';
+import toast from 'react-hot-toast';  // Updated import
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
 
@@ -28,7 +28,7 @@ export const createCSG = async (csgData) => {
 
 export const joinCSG = async (csgId, joinData) => {
   try {
-    const response = await api.post('/csg/join/' + csgId, joinData);
+    const response = await api.post(`/csg/join/${csgId}`, joinData);
     return response.data;
   } catch (error) {
     console.error('Error joining CSG:', error);
@@ -36,9 +36,9 @@ export const joinCSG = async (csgId, joinData) => {
   }
 };
 
-export const claimReward = async (csgId, claimData) => {
+export const claimReward = async (csgId, claimantData) => {
   try {
-    const response = await api.post('/csg/claim/' + csgId, claimData);
+    const response = await api.post(`/csg/${csgId}/claim`, claimantData);
     return response.data;
   } catch (error) {
     console.error('Error claiming reward:', error);
@@ -48,7 +48,7 @@ export const claimReward = async (csgId, claimData) => {
 
 export const endCSG = async (csgId) => {
   try {
-    const response = await api.post('/csg/end/' + csgId);
+    const response = await api.post(`/csg/end/${csgId}`);
     return response.data;
   } catch (error) {
     console.error('Error ending CSG:', error);
@@ -58,7 +58,7 @@ export const endCSG = async (csgId) => {
 
 export const listCSGs = async (page = 1, pageSize = 10) => {
   try {
-    const response = await api.get('/csg/list?page=' + page + '&pageSize=' + pageSize);
+    const response = await api.get(`/csg/list?page=${page}&pageSize=${pageSize}`);
     return response.data;
   } catch (error) {
     console.error('Error listing CSGs:', error);
@@ -68,17 +68,17 @@ export const listCSGs = async (page = 1, pageSize = 10) => {
 
 export const getCSG = async (csgId) => {
   try {
-    const response = await api.get('/csg/' + csgId);
+    const response = await api.get(`/csg/${csgId}`);
     return response.data;
   } catch (error) {
-    console.error('Error getting CSG:', error);
+    console.error('Error fetching CSG:', error);
     throw error;
   }
 };
 
 export const withdraw = async (csgId, withdrawData) => {
   try {
-    const response = await api.post('/csg/withdraw/' + csgId, withdrawData);
+    const response = await api.post(`/csg/withdraw/${csgId}`, withdrawData);
     return response.data;
   } catch (error) {
     console.error('Error withdrawing from CSG:', error);

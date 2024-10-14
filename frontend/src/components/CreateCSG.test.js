@@ -1,13 +1,13 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
-import { toast } from 'react-toastify';
+import toast from 'react-hot-toast';
 import { WalletProvider } from '../contexts/WalletContext';
 import CreateCSG from './CreateCSG';
 import { createCSG } from '../api/api';
 
 jest.mock('../api/api');
-jest.mock('react-toastify');
+jest.mock('react-hot-toast');
 
 const renderWithRouter = (ui, { route = '/' } = {}) => {
   window.history.pushState({}, 'Test page', route);
