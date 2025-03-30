@@ -10,6 +10,9 @@ Thrift Crowd Staking is a decentralized application (dApp) built on the Cardano 
 - Transparent and secure transactions using Cardano blockchain
 - User-friendly interface for managing multiple CSGs
 
+## Architecture
+![diagram](https://github.com/user-attachments/assets/74f041a3-6da2-4612-9e83-277111e9fc0f)
+
 ## Technology Stack
 
 - Smart Contracts: Plutus
