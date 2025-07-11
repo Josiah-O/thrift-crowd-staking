@@ -45,11 +45,11 @@ submitTransaction txCbor = do
         }
   
   response <- httpLbs req manager
-  let responseBody = responseBody response
+  let respBody = responseBody response
   let statusCode' = statusCode $ responseStatus response
   
   if statusCode' == 200
-    then case decode responseBody of
+    then case decode respBody of
       Just (Object obj) -> case parseMaybe (.: "hash") obj of
         Just hash -> return $ Right hash
         Nothing -> return $ Left "No hash in response"
@@ -69,9 +69,9 @@ queryAddressUtxos address = do
         { requestHeaders = [("project_id", BS.pack $ T.unpack projectId)] }
   
   response <- httpLbs req manager
-  let responseBody = responseBody response
+  let respBody = responseBody response
   
-  case decode responseBody of
+  case decode respBody of
     Just utxos -> return utxos
     Nothing -> return []
 
