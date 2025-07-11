@@ -22,9 +22,9 @@ main :: IO ()
 main = do
   putStrLn "Starting Thrift Crowd Staking backend on port 8080..."
   
-  -- Get database URL from environment
+  -- Get database URL from environment - fixed to match docker-compose.yml config
   dbUrl <- lookupEnv "DATABASE_URL"
-  let connStr = BS.pack $ fromMaybe "host=db dbname=thrift_crowd_staking user=postgres password=password" dbUrl
+  let connStr = BS.pack $ fromMaybe "host=postgres dbname=thrift_csg user=thrift_user password=thrift_password" dbUrl
   
   conn <- connectPostgreSQL connStr
   
