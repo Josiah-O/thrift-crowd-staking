@@ -8,17 +8,16 @@ COPY package*.json ./
 # Copy tailwind.config.js
 COPY tailwind.config.js ./
 
-# Clear npm cache and install dependencies
-RUN npm cache clean --force
+# Install dependencies
 RUN npm install
 
 # Copy the rest of the application code
 COPY . .
 
-# Build the application
-RUN npm install
-RUN npm run build
-
 EXPOSE 3000
 
-CMD ["npm", "start"]
+# Use a shell script to install new dependencies and start the app
+COPY start.sh /start.sh
+RUN chmod +x /start.sh
+
+CMD ["/start.sh"]

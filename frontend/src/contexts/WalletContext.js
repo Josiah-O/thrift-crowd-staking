@@ -7,48 +7,60 @@ export const useWallet = () => useContext(WalletContext);
 
 export const WalletProvider = ({ children }) => {
   const [wallet, setWallet] = useState(null);
+  const [network, setNetwork] = useState(null);
+
+  const checkWalletAvailability = () => {
+    return window.cardano && window.cardano.lace ? 'lace' : null;
+  };
 
   useEffect(() => {
     const checkWallet = async () => {
-      if (window.cardano) {
-        try {
-          const walletEnabled = await window.cardano.enable();
-          if (walletEnabled) {
-            setWallet(window.cardano);
-          }
-        } catch (error) {
-          console.error('Failed to enable wallet:', error);
-        }
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      const availableWallet = checkWalletAvailability();
+      if (availableWallet) {
+        setWallet({ name: availableWallet, api: null });
       }
     };
-
     checkWallet();
   }, []);
 
-  const connectWallet = async () => {
-    if (window.cardano) {
-      try {
-        const walletEnabled = await window.cardano.enable();
-        if (walletEnabled) {
-          setWallet(window.cardano);
-          toast.success('Wallet connected successfully!');
-        }
-      } catch (error) {
-        console.error('Failed to connect wallet:', error);
-        toast.error('Failed to connect wallet. Please try again.');
+  const connectWallet = async (targetNetwork = 'testnet') => {
+    if (!window.cardano || !window.cardano.lace) {
+      toast.error('Lace wallet not detected. Please install the Lace extension.');
+      return;
+    }
+
+    try {
+      const api = await window.cardano.lace.enable();
+      if (!api) {
+        throw new Error('Failed to enable Lace wallet API');
       }
-    } else {
-      toast.error('No Cardano wallet detected. Please install a wallet extension.');
+      
+      const networkId = await api.getNetworkId();
+      const isTestnet = networkId === 0;
+      if ((targetNetwork === 'testnet' && !isTestnet) || (targetNetwork === 'mainnet' && isTestnet)) {
+        toast.error(`Please switch to Cardano ${targetNetwork} in your Lace wallet.`);
+        return;
+      }
+
+      const [address] = await api.getUsedAddresses();
+      setWallet({ name: 'lace', api, address });
+      setNetwork(targetNetwork);
+      toast.success(`Lace wallet connected successfully to ${targetNetwork}!`);
+    } catch (error) {
+      console.error('Wallet connection error:', error);
+      toast.error('Failed to connect wallet. Please try again.');
     }
   };
 
   const disconnectWallet = () => {
     setWallet(null);
-    toast.info('Wallet disconnected.');
+    setNetwork(null);
+    toast.success('Wallet disconnected.');
   };
 
   return (
-    <WalletContext.Provider value={{ wallet, connectWallet, disconnectWallet }}>
+    <WalletContext.Provider value={{ wallet, network, connectWallet, disconnectWallet }}>
       {children}
     </WalletContext.Provider>
   );

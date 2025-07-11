@@ -18,10 +18,11 @@ api.interceptors.response.use(
 
 export const createCSG = async (csgData) => {
   try {
-    const response = await api.post('/csg/create', csgData);
+    // Make sure this endpoint matches your backend
+    const response = await axios.post(`${API_BASE_URL}/api/csg`, csgData);
     return response.data;
   } catch (error) {
-    console.error('Error creating CSG:', error);
+    console.error('API error:', error);
     throw error;
   }
 };
@@ -58,7 +59,10 @@ export const endCSG = async (csgId) => {
 
 export const listCSGs = async (page = 1, pageSize = 10) => {
   try {
-    const response = await api.get(`/csg/list?page=${page}&pageSize=${pageSize}`);
+    // Make sure this endpoint matches your backend
+    const response = await axios.get(`${API_BASE_URL}/api/csg`, {
+      params: { page, pageSize }
+    });
     return response.data;
   } catch (error) {
     console.error('Error listing CSGs:', error);

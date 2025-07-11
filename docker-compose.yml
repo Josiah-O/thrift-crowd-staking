@@ -1,16 +1,30 @@
-version: '3.8'
-
 services:
   backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+    build: ./backend
     ports:
       - "8080:8080"
-    environment:
-      - DATABASE_URL=postgresql://postgres:password@db:5432/thrift_crowd_staking
     depends_on:
       - db
+    environment:
+      - DATABASE_URL=postgresql://postgres:password@db:5432/thrift_crowd_staking
+      - BLOCKFROST_PROJECT_ID=preprodmwXhEarumXAwzwTo3U87ojvPR8uXm15o
+      - BLOCKFROST_BASE_URL=https://cardano-preprod.blockfrost.io/api/v0
+      - CARDANO_NETWORK=preprod
+    volumes:
+      - ./backend/src:/app/src
+      - ./backend/package.yaml:/app/package.yaml
+      - ./backend/stack.yaml:/app/stack.yaml
+    # Override for development with auto-reload
+    command: bash -c "cd /app && stack build && stack exec thrift-crowd-staking-exe"
+    develop:
+      watch:
+        - action: rebuild
+          path: ./backend/package.yaml
+        - action: rebuild  
+          path: ./backend/stack.yaml
+        - action: sync
+          path: ./backend/src
+          target: /app/src
 
   frontend:
     build:
@@ -19,7 +33,10 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - REACT_APP_API_URL=http://localhost:8080  # Adjust this URL as needed
+      - REACT_APP_API_URL=http://localhost:8080
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
     depends_on:
       - backend
 
@@ -27,6 +44,7 @@ services:
     image: postgres:13
     environment:
       - POSTGRES_DB=thrift_crowd_staking
+      - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=password
     volumes:
       - postgres_data:/var/lib/postgresql/data

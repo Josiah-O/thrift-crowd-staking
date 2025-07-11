@@ -10,15 +10,19 @@ description: Please see the README on GitHub at <https://github.com/Josiah-O/thr
 
 dependencies:
 - base >= 4.7 && < 5
-- aeson
+- servant
 - servant-server
-- wai
 - warp
+- wai
+- wai-cors
+- postgresql-simple
 - text
 - time
-- random
-- postgresql-simple
-- uuid
+- aeson
+- http-client
+- http-client-tls
+- bytestring
+- hashable
 
 library:
   source-dirs: src
@@ -34,5 +38,13 @@ executables:
     dependencies:
     - thrift-crowd-staking
 
-packages:
-- .
+tests:
+  thrift-crowd-staking-test:
+    main: Spec.hs
+    source-dirs: test
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - thrift-crowd-staking
