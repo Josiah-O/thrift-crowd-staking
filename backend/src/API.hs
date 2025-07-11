@@ -11,7 +11,8 @@ module API
   ) where
 
 import Servant
-import Servant.Server (err404, err400, err500, throwError)
+import Servant.Server (err404, err400, err500)
+import Control.Monad.Except (throwError)
 import CSG (CSG(..), CreateCSGRequest(..), JoinCSGRequest(..), ClaimRewardRequest(..), WithdrawRequest(..))
 import qualified CSG
 import qualified Cardano
