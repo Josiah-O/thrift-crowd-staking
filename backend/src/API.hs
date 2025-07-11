@@ -11,6 +11,7 @@ module API
   ) where
 
 import Servant
+import Servant.Server (err404, err400, err500, throwError)
 import CSG (CSG(..), CreateCSGRequest(..), JoinCSGRequest(..), ClaimRewardRequest(..), WithdrawRequest(..))
 import qualified CSG
 import qualified Cardano
@@ -19,6 +20,8 @@ import GHC.Generics
 import Control.Monad.IO.Class (liftIO)
 import Data.Time (UTCTime, getCurrentTime, addUTCTime)
 import qualified Data.Text as T
+import qualified Data.Text.Encoding as T
+import qualified Data.ByteString.Lazy.Char8 as L8
 import Database.PostgreSQL.Simple (Connection, FromRow(..), ToRow(..), Only(..), Query)
 import qualified Database.PostgreSQL.Simple as PG
 import Control.Exception (try, SomeException)
@@ -27,6 +30,7 @@ import Servant.API
 import qualified Data.Text as T
 import Data.Hashable (hash)
 import Numeric (showHex)
+import Control.Monad (when)
 
 type API = 
   "api" :> 
@@ -55,8 +59,16 @@ server conn = healthCheck
     healthCheck = return NoContent
     
     createCSG :: CreateCSGRequest -> Handler CSG
-    createCSG CreateCSGRequest{..} = liftIO $ do
-      currentTime <- getCurrentTime
+    createCSG CreateCSGRequest{..} = do
+      -- Input validation
+      when (T.null createCsgName || T.length createCsgName < 3) $
+        throwError err400 { errBody = L8.pack "CSG name must be at least 3 characters" }
+      when (createCsgStakeAmount <= 0) $
+        throwError err400 { errBody = L8.pack "Stake amount must be positive" }
+      when (createCsgDuration <= 0 || createCsgDuration > 365) $
+        throwError err400 { errBody = L8.pack "Duration must be between 1 and 365 days" }
+      
+      currentTime <- liftIO getCurrentTime
       let endTime = addUTCTime (fromIntegral $ createCsgDuration * 86400) currentTime
       
       -- Generate unique CSG ID from hash of name + timestamp  
@@ -68,57 +80,63 @@ server conn = healthCheck
       let contractAddress = Cardano.generateCSGAddress csgId
       
       -- Store CSG in database with contract address
-      _ <- PG.execute conn 
+      _ <- liftIO $ PG.execute conn 
         "INSERT INTO csgs (id, name, contract_address, stake_amount, duration, start_time, end_time, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
         (csgId, createCsgName, contractAddress, createCsgStakeAmount, createCsgDuration, currentTime, endTime, "Active" :: T.Text)
       
       return $ CSG csgId createCsgName [] createCsgStakeAmount createCsgDuration currentTime endTime "Active"
 
     joinCSG :: T.Text -> JoinCSGRequest -> Handler CSG
-    joinCSG csgId JoinCSGRequest{..} = liftIO $ do
-      csgRows <- PG.query conn "SELECT id, name, stake_amount, duration, start_time, end_time, status FROM csgs WHERE id = ?" (Only csgId)
+    joinCSG csgId JoinCSGRequest{..} = do
+      -- Input validation
+      when (T.null csgId || T.length csgId < 5) $
+        throwError err400 { errBody = L8.pack "Invalid CSG ID" }
+      when (joinStakeAmount <= 0) $
+        throwError err400 { errBody = L8.pack "Stake amount must be positive" }
+      
+      csgRows <- liftIO $ PG.query conn "SELECT id, name, stake_amount, duration, start_time, end_time, status FROM csgs WHERE id = ?" (Only csgId)
       case csgRows of
-        [] -> error "CSG not found"
+        [] -> throwError err404 { errBody = L8.pack "CSG not found" }
         (csg:_) -> do
-          txResult <- Cardano.createJoinTransaction csgId joinStakeAmount
+          txResult <- liftIO $ Cardano.createJoinTransaction csgId joinStakeAmount
           case txResult of
             Right txHash -> do
-              _ <- PG.execute conn 
+              _ <- liftIO $ PG.execute conn 
                 "INSERT INTO csg_transactions (csg_id, tx_hash, tx_type, amount) VALUES (?, ?, ?, ?)"
                 (csgId, txHash, "JOIN" :: T.Text, joinStakeAmount)
               return csg
-            Left err -> error err
+            Left err -> throwError err500 { errBody = L8.pack ("Transaction failed: " ++ err) }
 
     claimReward :: T.Text -> ClaimRewardRequest -> Handler CSG
-    claimReward csgId ClaimRewardRequest{..} = liftIO $ do
-      csgRows <- PG.query conn "SELECT id, name, stake_amount, duration, start_time, end_time, status FROM csgs WHERE id = ?" (Only csgId)
+    claimReward csgId ClaimRewardRequest{..} = do
+      csgRows <- liftIO $ PG.query conn "SELECT id, name, stake_amount, duration, start_time, end_time, status FROM csgs WHERE id = ?" (Only csgId)
       case csgRows of
-        [] -> error "CSG not found"
+        [] -> throwError err404 { errBody = L8.pack "CSG not found" }
         (csg:_) -> do
-          txResult <- Cardano.createClaimTransaction csgId claimantAddress
+          txResult <- liftIO $ Cardano.createClaimTransaction csgId claimantAddress
           case txResult of
             Right txHash -> do
-              _ <- PG.execute conn 
+              _ <- liftIO $ PG.execute conn 
                 "INSERT INTO csg_transactions (csg_id, tx_hash, tx_type, participant_address) VALUES (?, ?, ?, ?)"
                 (csgId, txHash, "CLAIM" :: T.Text, claimantAddress)
               return csg
-            Left err -> error err
+            Left err -> throwError err500 { errBody = L8.pack ("Transaction failed: " ++ err) }
 
     closeCSG :: T.Text -> Handler CSG
-    closeCSG csgId = liftIO $ do
-      csgRows <- PG.query conn "SELECT id, name, stake_amount, duration, start_time, end_time, status FROM csgs WHERE id = ?" (Only csgId)
+    closeCSG csgId = do
+      csgRows <- liftIO $ PG.query conn "SELECT id, name, stake_amount, duration, start_time, end_time, status FROM csgs WHERE id = ?" (Only csgId)
       case csgRows of
-        [] -> error "CSG not found"
+        [] -> throwError err404 { errBody = L8.pack "CSG not found" }
         (csg:_) -> do
-          txResult <- Cardano.createCloseTransaction csgId
+          txResult <- liftIO $ Cardano.createCloseTransaction csgId
           case txResult of
             Right txHash -> do
-              _ <- PG.execute conn "UPDATE csgs SET status = ? WHERE id = ?" ("Closed" :: T.Text, csgId)
-              _ <- PG.execute conn 
+              _ <- liftIO $ PG.execute conn "UPDATE csgs SET status = ? WHERE id = ?" ("Closed" :: T.Text, csgId)
+              _ <- liftIO $ PG.execute conn 
                 "INSERT INTO csg_transactions (csg_id, tx_hash, tx_type) VALUES (?, ?, ?)"
                 (csgId, txHash, "CLOSE" :: T.Text)
               return $ csg { csgStatus = "Closed" }
-            Left err -> error err
+            Left err -> throwError err500 { errBody = L8.pack ("Transaction failed: " ++ err) }
 
     listCSGs :: Handler [CSG]
     listCSGs = liftIO $ do
@@ -127,19 +145,19 @@ server conn = healthCheck
         CSG csgId name [] stake duration start end status) rows
 
     withdraw :: T.Text -> WithdrawRequest -> Handler CSG
-    withdraw csgId WithdrawRequest{..} = liftIO $ do
-      csgRows <- PG.query conn "SELECT id, name, stake_amount, duration, start_time, end_time, status FROM csgs WHERE id = ?" (Only csgId)
+    withdraw csgId WithdrawRequest{..} = do
+      csgRows <- liftIO $ PG.query conn "SELECT id, name, stake_amount, duration, start_time, end_time, status FROM csgs WHERE id = ?" (Only csgId)
       case csgRows of
-        [] -> error "CSG not found"
+        [] -> throwError err404 { errBody = L8.pack "CSG not found" }
         (csg:_) -> do
-          txResult <- Cardano.createWithdrawTransaction csgId withdrawAddress withdrawAmount
+          txResult <- liftIO $ Cardano.createWithdrawTransaction csgId withdrawAddress withdrawAmount
           case txResult of
             Right txHash -> do
-              _ <- PG.execute conn 
+              _ <- liftIO $ PG.execute conn 
                 "INSERT INTO csg_transactions (csg_id, tx_hash, tx_type, participant_address, amount) VALUES (?, ?, ?, ?, ?)"
                 (csgId, txHash, "WITHDRAW" :: T.Text, withdrawAddress, withdrawAmount)
               return csg
-            Left err -> error err
+            Left err -> throwError err500 { errBody = L8.pack ("Transaction failed: " ++ err) }
 
 app :: Connection -> Application
 app conn = serve api (server conn)
