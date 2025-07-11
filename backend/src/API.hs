@@ -20,7 +20,6 @@ import Control.Monad.IO.Class (liftIO)
 import Data.Time (UTCTime, getCurrentTime, addUTCTime)
 import qualified Data.Text as T
 import Database.PostgreSQL.Simple (Connection, FromRow(..), ToRow(..), Only(..), Query)
-import Database.PostgreSQL.Simple.FromRow (field)
 import qualified Database.PostgreSQL.Simple as PG
 import Control.Exception (try, SomeException)
 import Data.Proxy (Proxy(..))
@@ -42,18 +41,6 @@ type API =
 
 api :: Proxy API
 api = Proxy
-
--- Database instances - Fixed FromRow to match SQL query column order
--- Query: "SELECT id, name, stake_amount, duration, start_time, end_time, status FROM csgs"
-instance FromRow CSG where
-  fromRow = CSG <$> field          -- id
-                <*> field          -- name  
-                <*> pure []        -- participants (not selected, use empty list)
-                <*> field          -- stake_amount
-                <*> field          -- duration
-                <*> field          -- start_time
-                <*> field          -- end_time
-                <*> field          -- status
 
 server :: Connection -> Server API
 server conn = healthCheck

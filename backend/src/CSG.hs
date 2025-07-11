@@ -7,6 +7,7 @@ import Data.Text (Text)
 import Data.Time (UTCTime)
 import GHC.Generics (Generic)
 import Data.Aeson (ToJSON, FromJSON)
+import Database.PostgreSQL.Simple.FromRow (FromRow(..), field)
 
 data CSG = CSG
   { csgId :: Text
@@ -21,6 +22,17 @@ data CSG = CSG
 
 instance ToJSON CSG
 instance FromJSON CSG
+
+-- Database instance - matches SQL query: "SELECT id, name, stake_amount, duration, start_time, end_time, status FROM csgs"
+instance FromRow CSG where
+  fromRow = CSG <$> field          -- id -> csgId
+                <*> field          -- name -> csgName
+                <*> pure []        -- participants (not selected, use empty list)
+                <*> field          -- stake_amount -> csgTotalStake
+                <*> field          -- duration -> csgDuration
+                <*> field          -- start_time -> csgStartTime
+                <*> field          -- end_time -> csgEndTime
+                <*> field          -- status -> csgStatus
 
 data CreateCSGRequest = CreateCSGRequest
   { createCsgName :: Text
