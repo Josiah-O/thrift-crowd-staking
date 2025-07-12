@@ -14,8 +14,8 @@ services:
       - ./backend/src:/app/src
       - ./backend/package.yaml:/app/package.yaml
       - ./backend/stack.yaml:/app/stack.yaml
-    # Override for development with auto-reload
-    command: bash -c "cd /app && stack build && stack exec thrift-crowd-staking-exe"
+    # Use the compiled binary from Dockerfile
+    command: thrift-crowd-staking-exe
     develop:
       watch:
         - action: rebuild
