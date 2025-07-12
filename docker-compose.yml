@@ -7,13 +7,16 @@ services:
       - db
     environment:
       - DATABASE_URL=postgresql://postgres:password@db:5432/thrift_crowd_staking
-      - BLOCKFROST_PROJECT_ID=preprodmwXhEarumXAwzwTo3U87ojvPR8uXm15o
+      - BLOCKFROST_PROJECT_ID=${BLOCKFROST_PROJECT_ID}
       - BLOCKFROST_BASE_URL=https://cardano-preprod.blockfrost.io/api/v0
       - CARDANO_NETWORK=preprod
+      - CARDANO_WALLET_ADDRESS=${CARDANO_WALLET_ADDRESS}
+      - CARDANO_WALLET_SKEY_FILE=/app/keys/wallet.skey
     volumes:
       - ./backend/src:/app/src
       - ./backend/package.yaml:/app/package.yaml
       - ./backend/stack.yaml:/app/stack.yaml
+      - ./keys:/app/keys:ro
     # Use the compiled binary from Dockerfile
     command: thrift-crowd-staking-exe
     develop:

@@ -10,23 +10,22 @@ description: Please see the README on GitHub at <https://github.com/Josiah-O/thr
 
 dependencies:
 - base >= 4.7 && < 5
-- servant
-- servant-server
-- warp
-- wai
-- wai-cors
-- postgresql-simple
 - text
-- time
 - aeson
+- servant-server
+- wai
+- warp
+- postgresql-simple
+- mtl
+- time
+- hashable
+- uuid
 - http-client
 - http-client-tls
 - http-types
 - bytestring
-- hashable
-- mtl
-- uuid
 - http-api-data
+- process
 
 library:
   source-dirs: src

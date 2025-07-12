@@ -26,9 +26,12 @@ RUN stack build --copy-bins
 # Runtime stage - much smaller final image
 FROM ubuntu:20.04
 
-# Install runtime dependencies
+# Install runtime dependencies including cardano-cli
 RUN apt-get update && \
-    apt-get install -y libpq5 ca-certificates && \
+    apt-get install -y libpq5 ca-certificates curl gnupg && \
+    # Add IOG signing key
+    curl -fsSL https://github.com/input-output-hk/cardano-node/releases/download/1.35.4/cardano-node-1.35.4-linux.tar.gz | tar -xz -C /usr/local/bin && \
+    # Clean up
     rm -rf /var/lib/apt/lists/*
 
 # Copy the built binary from builder stage

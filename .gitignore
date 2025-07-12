@@ -44,3 +44,6 @@ Thumbs.db
 
 # Environment variables
 .env
+
+# Cardano wallet keys (NEVER commit these!)
+keys/
