@@ -26,6 +26,7 @@ dependencies:
 - hashable
 - mtl
 - uuid
+- http-api-data
 
 library:
   source-dirs: src
