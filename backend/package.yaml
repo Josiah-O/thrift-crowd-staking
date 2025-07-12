@@ -24,6 +24,7 @@ dependencies:
 - http-types
 - bytestring
 - hashable
+- mtl
 
 library:
   source-dirs: src
