@@ -17,6 +17,7 @@ import Web.HttpApiData (ToHttpApiData(..))
 import System.Environment (lookupEnv)
 import qualified Data.ByteString.Char8 as BS
 import Data.Maybe (fromMaybe)
+import Data.String (fromString)
 
 main :: IO ()
 main = do
@@ -42,7 +43,7 @@ main = do
 initializeDatabase :: Connection -> IO ()
 initializeDatabase conn = do
   putStrLn "Initializing database..."
-  _ <- execute_ conn $ unlines
+  _ <- execute_ conn $ fromString $ unlines
     [ "CREATE TABLE IF NOT EXISTS csgs ("
     , "    id VARCHAR(64) PRIMARY KEY,"
     , "    name VARCHAR(255) NOT NULL,"
