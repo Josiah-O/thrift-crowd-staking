@@ -25,6 +25,7 @@ dependencies:
 - bytestring
 - hashable
 - mtl
+- uuid
 
 library:
   source-dirs: src
