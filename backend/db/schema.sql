@@ -4,11 +4,11 @@ CREATE TABLE IF NOT EXISTS csgs (
     contract_address VARCHAR(255) NOT NULL,
     stake_amount BIGINT NOT NULL,
     duration INTEGER NOT NULL,
-    start_time TIMESTAMP NOT NULL,
-    end_time TIMESTAMP NOT NULL,
+    start_time TIMESTAMPTZ NOT NULL,
+    end_time TIMESTAMPTZ NOT NULL,
     status VARCHAR(50) NOT NULL,
     participants TEXT[] DEFAULT '{}',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS csg_transactions (
@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS csg_transactions (
     tx_type VARCHAR(50) NOT NULL, -- 'CREATE', 'JOIN', 'CLAIM', 'CLOSE'
     participant_address VARCHAR(255),
     amount BIGINT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE INDEX idx_csgs_status ON csgs(status);
