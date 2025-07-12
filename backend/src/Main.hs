@@ -42,7 +42,7 @@ main = do
 initializeDatabase :: Connection -> IO ()
 initializeDatabase conn = do
   putStrLn "Initializing database..."
-  _ <- execute_ conn $ Query $ BS.pack $ unlines
+  _ <- execute_ conn $ unlines
     [ "CREATE TABLE IF NOT EXISTS csgs ("
     , "    id VARCHAR(64) PRIMARY KEY,"
     , "    name VARCHAR(255) NOT NULL,"
