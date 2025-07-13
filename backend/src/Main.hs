@@ -18,6 +18,9 @@ import System.Environment (lookupEnv)
 import qualified Data.ByteString.Char8 as BS
 import Data.Maybe (fromMaybe)
 import Data.String (fromString)
+import Control.Exception (try, SomeException)
+import Control.Concurrent (threadDelay)
+import Control.Monad (when)
 
 main :: IO ()
 main = do
@@ -25,9 +28,12 @@ main = do
   
   -- Get database URL from environment - fixed to match docker-compose.yml config
   dbUrl <- lookupEnv "DATABASE_URL"
-  let connStr = BS.pack $ fromMaybe "host=postgres dbname=thrift_csg user=thrift_user password=thrift_password" dbUrl
+  let connStr = BS.pack $ fromMaybe "postgresql://postgres:password@db:5432/thrift_crowd_staking" dbUrl
   
-  conn <- connectPostgreSQL connStr
+  putStrLn $ "Attempting to connect to database: " ++ show connStr
+  
+  -- Wait for database to be ready
+  conn <- waitForDatabase connStr 30  -- Wait up to 30 seconds
   
   -- Initialize database schema
   initializeDatabase conn
@@ -38,6 +44,25 @@ main = do
         , corsRequestHeaders = ["Authorization", "Content-Type"]
         }
   run 8080 $ cors (const $ Just corsPolicy) $ app conn
+
+-- Wait for database to be available with retry logic
+waitForDatabase :: BS.ByteString -> Int -> IO Connection
+waitForDatabase connStr maxRetries = go maxRetries
+  where
+    go 0 = error "Failed to connect to database after maximum retries"
+    go n = do
+      putStrLn $ "Attempting database connection (attempt " ++ show (maxRetries - n + 1) ++ "/" ++ show maxRetries ++ ")..."
+      result <- try (connectPostgreSQL connStr)
+      case result of
+        Right conn -> do
+          putStrLn "Successfully connected to database!"
+          return conn
+        Left (e :: SomeException) -> do
+          putStrLn $ "Database connection failed: " ++ show e
+          when (n > 1) $ do
+            putStrLn "Retrying in 2 seconds..."
+            threadDelay 2000000  -- Wait 2 seconds
+          go (n - 1)
 
 -- Initialize database tables
 initializeDatabase :: Connection -> IO ()
