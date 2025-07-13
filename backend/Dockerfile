@@ -38,11 +38,15 @@ RUN git clone https://github.com/supranational/blst.git && \
     ./build.sh && \
     cp libblst.a /usr/local/lib/ && \
     cp bindings/blst.h /usr/local/include/ && \
-    echo "prefix=/usr/local\nlibdir=/usr/local/lib\nincludedir=/usr/local/include\n\nName: blst\nDescription: BLS12-381 signature library\nVersion: 0.3.10\nLibs: -L\${libdir} -lblst\nCflags: -I\${includedir}" > /usr/local/lib/pkgconfig/blst.pc && \
+    mkdir -p /usr/local/lib/pkgconfig && \
+    echo "prefix=/usr/local\nlibdir=/usr/local/lib\nincludedir=/usr/local/include\n\nName: libblst\nDescription: BLS12-381 signature library\nVersion: 0.3.10\nLibs: -L\${libdir} -lblst\nCflags: -I\${includedir}" > /usr/local/lib/pkgconfig/libblst.pc && \
     echo "/usr/local/lib" > /etc/ld.so.conf.d/blst.conf && \
     ldconfig && \
     cd .. && \
     rm -rf blst
+
+# Set environment variables for pkg-config
+ENV PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:$PKG_CONFIG_PATH
 
 # Update library cache
 RUN ldconfig
