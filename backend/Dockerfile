@@ -14,7 +14,10 @@ RUN apt-get update && \
 WORKDIR /app
 
 # Copy Stack configuration first for better caching
-COPY stack.yaml package.yaml ./
+COPY backend/stack.yaml backend/package.yaml ./
+
+# Copy smart-contracts directory for Stack to resolve
+COPY smart-contracts/ ../smart-contracts/
 
 # Install GHC and setup Stack
 RUN stack setup --install-ghc
@@ -23,7 +26,7 @@ RUN stack setup --install-ghc
 RUN stack build --only-dependencies
 
 # Copy source code
-COPY src/ src/
+COPY backend/src/ src/
 
 # Build the application
 RUN stack build --copy-bins
@@ -44,7 +47,7 @@ COPY --from=builder /root/.local/bin/thrift-crowd-staking-exe /usr/local/bin/
 
 # Create app directory and copy source for development
 WORKDIR /app
-COPY src/ src/
+COPY backend/src/ src/
 
 EXPOSE 8080
 
