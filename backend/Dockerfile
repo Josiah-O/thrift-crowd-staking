@@ -8,8 +8,41 @@ RUN sed -i 's/deb.debian.org/archive.debian.org/g' /etc/apt/sources.list && \
 
 # Install system dependencies
 RUN apt-get update && \
-    apt-get install -y libpq-dev libsodium-dev pkg-config && \
+    apt-get install -y libpq-dev libsodium-dev pkg-config build-essential git curl libtool autoconf automake && \
     rm -rf /var/lib/apt/lists/*
+
+# Build IOG-specified versions of crypto libraries
+RUN git clone https://github.com/input-output-hk/libsodium.git && \
+    cd libsodium && \
+    git checkout 66f017f1 && \
+    ./autogen.sh && \
+    ./configure && \
+    make && \
+    make install && \
+    cd .. && \
+    rm -rf libsodium
+
+RUN git clone https://github.com/bitcoin-core/secp256k1.git && \
+    cd secp256k1 && \
+    git checkout ac83be33 && \
+    ./autogen.sh && \
+    ./configure --enable-module-schnorrsig --enable-experimental && \
+    make && \
+    make install && \
+    cd .. && \
+    rm -rf secp256k1
+
+RUN git clone https://github.com/supranational/blst.git && \
+    cd blst && \
+    ./build.sh && \
+    cp libblst.a /usr/local/lib/ && \
+    cp bindings/blst.h /usr/local/include/ && \
+    echo "prefix=/usr/local\nlibdir=/usr/local/lib\nincludedir=/usr/local/include\n\nName: blst\nDescription: BLS12-381 signature library\nVersion: 0.3.10\nLibs: -L\${libdir} -lblst\nCflags: -I\${includedir}" > /usr/local/lib/pkgconfig/blst.pc && \
+    cd .. && \
+    rm -rf blst
+
+# Update library cache
+RUN ldconfig
 
 WORKDIR /app
 

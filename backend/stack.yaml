@@ -1,5 +1,8 @@
 resolver: lts-20.26
 
+# Specify Cabal version as required by IOG
+cabal-version: 3.8.1.0
+
 packages:
 - .
 - ../smart-contracts
