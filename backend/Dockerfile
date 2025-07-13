@@ -1,6 +1,11 @@
 # Multi-stage build for better caching and smaller final image
 FROM haskell:8.10.7 as builder
 
+# Fix Debian Buster archived repositories
+RUN sed -i 's/deb.debian.org/archive.debian.org/g' /etc/apt/sources.list && \
+    sed -i 's/security.debian.org/archive.debian.org/g' /etc/apt/sources.list && \
+    sed -i '/stretch-updates/d' /etc/apt/sources.list
+
 # Install system dependencies
 RUN apt-get update && \
     apt-get install -y libpq-dev && \
