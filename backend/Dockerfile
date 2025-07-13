@@ -29,8 +29,8 @@ FROM ubuntu:20.04
 # Install runtime dependencies including cardano-cli
 RUN apt-get update && \
     apt-get install -y libpq5 ca-certificates curl gnupg && \
-    # Add IOG signing key
-    curl -fsSL https://github.com/input-output-hk/cardano-node/releases/download/1.35.4/cardano-node-1.35.4-linux.tar.gz | tar -xz -C /usr/local/bin && \
+    # Add IOG signing key and download cardano-node 9.1.0
+    curl -fsSL https://github.com/IntersectMBO/cardano-node/releases/download/9.1.0/cardano-node-9.1.0-linux.tar.gz | tar -xz -C /usr/local/bin && \
     # Clean up
     rm -rf /var/lib/apt/lists/*
 
