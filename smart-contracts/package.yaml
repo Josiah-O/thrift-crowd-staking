@@ -1,0 +1,28 @@
+name: thrift-crowd-staking-contracts
+version: 0.1.0.0
+
+dependencies:
+  - base >= 4.9 && < 5
+  - plutus-core
+  - plutus-ledger-api  
+  - plutus-tx
+  - plutus-tx-plugin
+  - bytestring
+  - serialise
+
+library:
+  source-dirs: src
+  exposed-modules:
+    - CSGContract
+  ghc-options:
+    - -fno-ignore-interface-pragmas
+    - -fno-omit-interface-pragmas
+    - -fobject-code
+    - -fplugin PlutusTx.Plugin
+
+tests:
+  smart-contracts-test:
+    main: CSGContractSpec.hs
+    source-dirs: test
+    dependencies:
+      - thrift-crowd-staking-contracts 
