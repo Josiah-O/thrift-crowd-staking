@@ -50,7 +50,7 @@ validateJoin dat ctx =
     correctStakeAmount = 
         let inVal  = valueSpent info
             outVal = valueProduced info
-        in outVal == inVal <> Ada.lovelaceValueOf 100_000_000  -- 100 ADA stake
+        in outVal == inVal <> Ada.lovelaceValueOf 100000000  -- 100 ADA stake
 
 validateClaim :: CSGDatum -> ScriptContext -> Bool
 validateClaim dat ctx =
