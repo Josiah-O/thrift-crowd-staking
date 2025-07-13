@@ -32,8 +32,9 @@ extra-deps:
   subdirs:
     - cardano-binary
 - git: https://github.com/IntersectMBO/cardano-base
-  commit: f11ddc7f
+  commit: f11ddc7f87038c16d5a6d7611fb5dda51be9533d
   subdirs:
     - cardano-strict-containers
+
 
 allow-newer: true
