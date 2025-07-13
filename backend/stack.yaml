@@ -22,14 +22,5 @@ extra-deps:
     - plutus-ledger-api
     - plutus-tx
     - plutus-tx-plugin
-    - prettyprinter-configurable
-- git: https://github.com/IntersectMBO/cardano-base
-  commit: 75267027f157f1312964e7126280920d1245c52d
-  subdirs:
-    - cardano-crypto-class
-- git: https://github.com/IntersectMBO/cardano-prelude
-  commit: 75267027f157f1312964e7126280920d1245c52d
-  subdirs:
-    - cardano-prelude
 
 allow-newer: true
