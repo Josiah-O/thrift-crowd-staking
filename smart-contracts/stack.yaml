@@ -1,0 +1,18 @@
+resolver: lts-20.26
+
+packages:
+- .
+
+extra-deps:
+- servant-0.19.1
+- servant-server-0.19.2
+# Git-based dependencies from official IntersectMBO repositories
+- git: https://github.com/IntersectMBO/plutus
+  commit: 75267027f157f1312964e7126280920d1245c52d
+  subdirs:
+    - plutus-core
+    - plutus-ledger-api
+    - plutus-tx
+    - plutus-tx-plugin
+
+allow-newer: true 

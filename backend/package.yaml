@@ -29,10 +29,6 @@ dependencies:
 - temporary
 - filepath
 - containers
-- plutus-ledger-api
-- plutus-tx
-- plutus-tx-plugin
-- cardano-api
 - thrift-crowd-staking-contracts
 
 library:
