@@ -1,5 +1,5 @@
 # Multi-stage build for better caching and smaller final image
-FROM haskell:8.10.7 as builder
+FROM haskell:9.2.8 as builder
 
 # Fix Debian Buster archived repositories
 RUN sed -i 's/deb.debian.org/archive.debian.org/g' /etc/apt/sources.list && \
@@ -23,31 +23,35 @@ COPY smart-contracts/ ../smart-contracts/
 RUN stack setup --install-ghc
 
 # Build dependencies in separate layer - this will cache!
-RUN stack build --only-dependencies
+RUN stack build --dependencies-only
 
 # Copy source code
 COPY backend/src/ src/
 
 # Build the application
-RUN stack build --copy-bins
+RUN stack build
 
-# Runtime stage - much smaller final image
+# Runtime stage
 FROM ubuntu:20.04
 
-# Install runtime dependencies including cardano-cli
+# Install system dependencies for runtime
 RUN apt-get update && \
     apt-get install -y libpq5 ca-certificates curl gnupg && \
-    # Add IOG signing key and download cardano-node 9.1.0
-    curl -fsSL https://github.com/IntersectMBO/cardano-node/releases/download/9.1.0/cardano-node-9.1.0-linux.tar.gz | tar -xz -C /usr/local/bin && \
-    # Clean up
+    curl -fsSL https://git.io/git-extras-setup | bash && \
     rm -rf /var/lib/apt/lists/*
 
-# Copy the built binary from builder stage
-COPY --from=builder /root/.local/bin/thrift-crowd-staking-exe /usr/local/bin/
+# Install Node.js 18.x
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
+    apt-get install -y nodejs
 
-# Create app directory and copy source for development
+# Copy the built binary from builder stage
+COPY --from=builder /app/.stack-work/install/x86_64-linux/*/*/bin/thrift-crowd-staking-exe /usr/local/bin/thrift-crowd-staking-exe
+
+# Create non-root user
+RUN adduser --disabled-password --gecos '' appuser
+USER appuser
+
 WORKDIR /app
-COPY backend/src/ src/
 
 EXPOSE 8080
 
