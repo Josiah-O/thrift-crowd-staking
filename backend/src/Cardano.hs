@@ -166,7 +166,7 @@ submitTransactionFile txFile = do
     
   case result of
     Left ex -> return $ Left $ "Failed to submit transaction: " ++ show ex
-    Right (ExitSuccess, stdout, _) -> 
+    Right (ExitSuccess, stdout, _) -> do
       -- Extract transaction ID from stdout
       let txId = T.strip $ T.pack stdout
       return $ Right txId
