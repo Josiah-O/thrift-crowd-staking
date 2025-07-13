@@ -8,29 +8,8 @@ RUN sed -i 's/deb.debian.org/archive.debian.org/g' /etc/apt/sources.list && \
 
 # Install system dependencies
 RUN apt-get update && \
-    apt-get install -y libpq-dev libsodium-dev pkg-config git build-essential && \
+    apt-get install -y libpq-dev libsodium-dev pkg-config && \
     rm -rf /var/lib/apt/lists/*
-
-# Build and install BLST from source (required for cardano-crypto-class)
-RUN cd /tmp && \
-    git clone https://github.com/supranational/blst.git && \
-    cd blst && \
-    ./build.sh && \
-    cp libblst.a /usr/local/lib/ && \
-    cp bindings/blst.h bindings/blst_aux.h /usr/local/include/ && \
-    echo "prefix=/usr/local" > /usr/local/lib/pkgconfig/libblst.pc && \
-    echo "exec_prefix=\${prefix}" >> /usr/local/lib/pkgconfig/libblst.pc && \
-    echo "libdir=\${exec_prefix}/lib" >> /usr/local/lib/pkgconfig/libblst.pc && \
-    echo "includedir=\${prefix}/include" >> /usr/local/lib/pkgconfig/libblst.pc && \
-    echo "" >> /usr/local/lib/pkgconfig/libblst.pc && \
-    echo "Name: libblst" >> /usr/local/lib/pkgconfig/libblst.pc && \
-    echo "Description: BLS12-381 signature library" >> /usr/local/lib/pkgconfig/libblst.pc && \
-    echo "Version: 0.3.11" >> /usr/local/lib/pkgconfig/libblst.pc && \
-    echo "Libs: -L\${libdir} -lblst" >> /usr/local/lib/pkgconfig/libblst.pc && \
-    echo "Cflags: -I\${includedir}" >> /usr/local/lib/pkgconfig/libblst.pc && \
-    mkdir -p /usr/local/lib/pkgconfig && \
-    ldconfig && \
-    cd / && rm -rf /tmp/blst
 
 WORKDIR /app
 

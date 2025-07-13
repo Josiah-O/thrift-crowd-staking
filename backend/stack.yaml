@@ -39,3 +39,8 @@ extra-deps:
 
 
 allow-newer: true
+
+flags:
+  cardano-crypto-class:
+    development: false
+    secp256k1-support: false
