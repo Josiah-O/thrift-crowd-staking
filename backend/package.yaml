@@ -32,7 +32,6 @@ dependencies:
 - plutus-ledger-api
 - plutus-tx
 - plutus-tx-plugin
-- plutus-script-utils
 - cardano-api
 - cardano-ledger-core
 - thrift-crowd-staking-contracts

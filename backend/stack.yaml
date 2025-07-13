@@ -2,19 +2,23 @@ resolver: lts-18.28
 
 packages:
 - .
+- ../smart-contracts
 
 extra-deps:
 - servant-0.19.1
 - servant-server-0.19.2
+# Git-based dependencies from official IntersectMBO repositories
+- git: https://github.com/IntersectMBO/plutus
+  commit: 75267027f157f1312964e7126280920d1245c52d
+  subdirs:
+    - plutus-core
+    - plutus-ledger-api
+    - plutus-tx
+    - plutus-tx-plugin
+- git: https://github.com/IntersectMBO/cardano-api
+  commit: 8fd7b5c2a86f6c9e8e2c7a9b6b8c6e8e9e4b5c6d
+  subdirs:
+    - cardano-api
+    - cardano-ledger-core
 
 allow-newer: true
-
-# Allow newer versions of CHaP packages
-allow-newer-deps:
-- plutus-core
-- plutus-ledger-api
-- plutus-tx
-- plutus-tx-plugin
-- plutus-script-utils
-- cardano-api
-- cardano-ledger-core
