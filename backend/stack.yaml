@@ -8,3 +8,13 @@ extra-deps:
 - servant-server-0.19.2
 
 allow-newer: true
+
+# Allow newer versions of CHaP packages
+allow-newer-deps:
+- plutus-core
+- plutus-ledger-api
+- plutus-tx
+- plutus-tx-plugin
+- plutus-script-utils
+- cardano-api
+- cardano-ledger-core
