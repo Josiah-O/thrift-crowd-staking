@@ -27,6 +27,7 @@ extra-deps:
   commit: 994d5b42e28b98e4a4a53607182b93b6390e5487
   subdirs:
     - cardano-crypto-class
+    - heapwords
 - git: https://github.com/input-output-hk/cardano-base
   commit: ca78a7ca7f91ed0f14dab244426432aae90c698b
   subdirs:
