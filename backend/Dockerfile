@@ -52,6 +52,9 @@ ENV PKG_CONFIG_PATH=/usr/local/lib/pkgconfig:$PKG_CONFIG_PATH
 # Update library cache
 RUN ldconfig
 
+# Build arguments
+ARG STACK_ARGS=""
+
 WORKDIR /app
 
 # Copy Stack configuration first for better caching
@@ -67,10 +70,10 @@ COPY backend/src/ src/
 RUN stack setup --install-ghc
 
 # Build dependencies in separate layer - this will cache!
-RUN stack build --dependencies-only
+RUN stack build --dependencies-only ${STACK_ARGS}
 
 # Build the application
-RUN stack build
+RUN stack build ${STACK_ARGS}
 
 # Runtime stage
 FROM ubuntu:20.04
