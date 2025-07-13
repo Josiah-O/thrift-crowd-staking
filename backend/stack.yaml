@@ -2,11 +2,23 @@ resolver: lts-20.26
 
 packages:
 - .
-- ../smart-contracts
+# - ../smart-contracts
 
 extra-deps:
 - servant-0.19.1
 - servant-server-0.19.2
+# Additional dependencies needed for Cardano/Plutus libraries
+- FailT-0.1.2.0@sha256:8b0f55600f709f909d06204833f30c7b9316cdecb8e863404252d6dbdac7a56c,2594
+- cardano-addresses-4.0.0@sha256:bb0f8146494fa81507f102187e141ee7d3ce7c19dbf319b70906931636d79eaa,6570
+- cardano-crypto-1.3.0@sha256:a4de03348156cd85676489fdb5505ca2b3c8eff7e725cccbff5b124d62329bbc,5148
+- contra-tracer-0.2.0.0@sha256:7e1df39934fb0ecf4533196c819946455ec377fbc169b819be151906db244fc2,905
+- crypton-1.0.4@sha256:353391cc2cc583cf5e44c35c46b7a548a218037f2249c40a9712e00d7c46580c,14513
+- dom-lt-0.2.3@sha256:1df9402e21e97de0da74fdf2a9f8c96ab8a710c602eb6d22ac8e9c274db51090,1938
+- flat-0.6@sha256:fbb17e2ae8ec5a7e02d74b505178b92ceb19ef991054c625ea570d33a595dfa3,7464
+- hedgehog-extras-0.9.0.0@sha256:31471358265d1c68fcaba4aadea85c2b2415560808aea5b827ee1163ca895590,9863
+- lazy-search-0.1.3.0@sha256:7585b6cac1bf24ece7dea2273b7cd48b01f87314b39c2abb356e7cfb6ac2af90,1239
+- nothunks-0.3.0.0@sha256:77bff31644eb83bf35f5afbb493474f50374159cf4f4358421229e8fe0d38123,2912
+- transformers-except-0.1.4@sha256:3ce3fd4deb67beebfd35dbe3c7cbb97654edc322e8f38d198fd77468e396f9f1,1175
 # Git-based dependencies from official IntersectMBO repositories
 - git: https://github.com/IntersectMBO/plutus
   commit: 75267027f157f1312964e7126280920d1245c52d
