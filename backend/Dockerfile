@@ -38,6 +38,7 @@ RUN git clone https://github.com/supranational/blst.git && \
     ./build.sh && \
     cp libblst.a /usr/local/lib/ && \
     cp bindings/blst.h /usr/local/include/ && \
+    cp bindings/blst_aux.h /usr/local/include/ && \
     mkdir -p /usr/local/lib/pkgconfig && \
     echo "prefix=/usr/local\nlibdir=/usr/local/lib\nincludedir=/usr/local/include\n\nName: libblst\nDescription: BLS12-381 signature library\nVersion: 0.3.10\nLibs: -L\${libdir} -lblst\nCflags: -I\${includedir}" > /usr/local/lib/pkgconfig/libblst.pc && \
     echo "/usr/local/lib" > /etc/ld.so.conf.d/blst.conf && \
