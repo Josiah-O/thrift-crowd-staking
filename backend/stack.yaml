@@ -19,6 +19,5 @@ extra-deps:
   commit: 550f37dded27e7c1d071507aadc2e5db9abcc760
   subdirs:
     - cardano-api
-    - cardano-ledger-core
 
 allow-newer: true

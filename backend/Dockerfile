@@ -19,14 +19,14 @@ COPY backend/stack.yaml backend/package.yaml ./
 # Copy smart-contracts directory for Stack to resolve
 COPY smart-contracts/ ../smart-contracts/
 
+# Copy source code - needed for Stack setup
+COPY backend/src/ src/
+
 # Install GHC and setup Stack
 RUN stack setup --install-ghc
 
 # Build dependencies in separate layer - this will cache!
 RUN stack build --dependencies-only
-
-# Copy source code
-COPY backend/src/ src/
 
 # Build the application
 RUN stack build
