@@ -23,5 +23,9 @@ extra-deps:
     - plutus-tx
     - plutus-tx-plugin
     - prettyprinter-configurable
+- git: https://github.com/IntersectMBO/cardano-base
+  commit: 994d5b42e28b98e4a4a53607182b93b6390e5487
+  subdirs:
+    - cardano-crypto-class
 
 allow-newer: true
