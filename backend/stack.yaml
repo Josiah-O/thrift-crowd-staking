@@ -24,5 +24,4 @@ extra-deps:
     - plutus-tx-plugin
     - prettyprinter-configurable
 
-allow-newer: 
-  - plutus-core:cardano-crypto-class
+allow-newer: ["plutus-core:cardano-crypto-class"]
