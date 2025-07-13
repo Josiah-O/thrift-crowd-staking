@@ -22,5 +22,6 @@ extra-deps:
     - plutus-ledger-api
     - plutus-tx
     - plutus-tx-plugin
+    - prettyprinter-configurable
 
 allow-newer: true
