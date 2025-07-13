@@ -16,7 +16,7 @@ extra-deps:
     - plutus-tx
     - plutus-tx-plugin
 - git: https://github.com/IntersectMBO/cardano-api
-  commit: 8fd7b5c2a86f6c9e8e2c7a9b6b8c6e8e9e4b5c6d
+  commit: 550f37dded27e7c1d071507aadc2e5db9abcc760
   subdirs:
     - cardano-api
     - cardano-ledger-core
