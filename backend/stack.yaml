@@ -45,4 +45,4 @@ allow-newer: true
 
 flags:
   cardano-crypto-class:
-    secp256k1-support: false
+    secp256k1-support: true
