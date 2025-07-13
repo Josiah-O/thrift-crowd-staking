@@ -8,7 +8,7 @@ RUN sed -i 's/deb.debian.org/archive.debian.org/g' /etc/apt/sources.list && \
 
 # Install system dependencies
 RUN apt-get update && \
-    apt-get install -y libpq-dev && \
+    apt-get install -y libpq-dev libsodium-dev pkg-config && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
