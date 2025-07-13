@@ -10,7 +10,6 @@ import Network.Wai.Middleware.Cors
 import Database.PostgreSQL.Simple
 import Servant
 import API (app)
-import qualified Auth
 import CSG (CSG(..), CreateCSGRequest(..))
 import Data.Text (Text)
 import Data.Time (UTCTime)
@@ -25,7 +24,7 @@ import Control.Monad (when)
 
 main :: IO ()
 main = do
-  putStrLn "Starting Thrift Crowd Staking backend on port 8080..."
+  putStrLn "Starting Thrift Crowd Staking DApp backend on port 8080..."
   
   -- Get database URL from environment - fixed to match docker-compose.yml config
   dbUrl <- lookupEnv "DATABASE_URL"
@@ -39,27 +38,24 @@ main = do
   -- Initialize database schema
   initializeDatabase conn
   
-  -- Get authentication context
-  authCtx <- Auth.authContext
-  
   let corsPolicy = simpleCorsResourcePolicy 
         { corsOrigins = Just (["http://localhost:3000"], True)
         , corsMethods = ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
-        , corsRequestHeaders = ["Authorization", "Content-Type"]
+        , corsRequestHeaders = ["Content-Type"]
         }
   
-  putStrLn "Available endpoints:"
-  putStrLn "  POST /api/auth/wallet - Authenticate with wallet (wallet-only)"
-  putStrLn "  POST /api/create-csg - Create new CSG (auth required)"
-  putStrLn "  POST /api/join-csg/{id} - Join CSG (auth required)"
-  putStrLn "  POST /api/claim-reward/{id} - Claim rewards (auth required)"
-  putStrLn "  POST /api/close-csg/{id} - Close CSG (auth required)"
-  putStrLn "  GET /api/list-csgs - List active CSGs (auth required)"
-  putStrLn "  POST /api/withdraw/{id} - Withdraw from CSG (auth required)"
+  putStrLn "Available endpoints (DApp - no authentication required):"
+  putStrLn "  GET /api/health - Health check"
+  putStrLn "  POST /api/create-csg - Create new CSG"
+  putStrLn "  POST /api/join-csg/{id} - Join CSG"
+  putStrLn "  POST /api/claim-reward/{id} - Claim rewards"
+  putStrLn "  POST /api/close-csg/{id} - Close CSG"
+  putStrLn "  GET /api/list-csgs - List active CSGs"
+  putStrLn "  POST /api/withdraw/{id} - Withdraw from CSG"
   putStrLn ""
-  putStrLn "Authentication: Include 'Authorization: Bearer <token>' header for protected endpoints"
+  putStrLn "Pure DApp: All operations are wallet-based, no backend authentication!"
   
-  run 8080 $ cors (const $ Just corsPolicy) $ app conn authCtx
+  run 8080 $ cors (const $ Just corsPolicy) $ app conn
 
 -- Wait for database to be available with retry logic
 waitForDatabase :: BS.ByteString -> Int -> IO Connection
@@ -86,7 +82,7 @@ initializeDatabase conn = do
   putStrLn "Initializing database..."
   
   -- Create users table first
-  Auth.createUserTable conn
+  -- Auth.createUserTable conn -- Removed auth-related initialization
   
   _ <- execute_ conn $ fromString $ unlines
     [ "CREATE TABLE IF NOT EXISTS csgs ("

@@ -13,8 +13,6 @@ dependencies:
 - text
 - aeson
 - servant-server
-- servant-auth
-- servant-auth-server
 - wai
 - warp
 - postgresql-simple
@@ -31,11 +29,6 @@ dependencies:
 - temporary
 - filepath
 - containers
-- jose
-- jwt
-- bcrypt
-- wai-middleware-auth
-- cookie
 
 library:
   source-dirs: src

@@ -11,13 +11,11 @@ module API
   ) where
 
 import Servant
-import Servant.Auth.Server
 import Servant.Server (err404, err400, err500)
 import Control.Monad.Except (throwError)
 import CSG (CSG(..), CreateCSGRequest(..), JoinCSGRequest(..), ClaimRewardRequest(..), WithdrawRequest(..))
 import qualified CSG
 import qualified Cardano
-import qualified Auth
 import Data.Aeson (ToJSON, FromJSON)
 import GHC.Generics
 import Control.Monad.IO.Class (liftIO)
@@ -38,21 +36,19 @@ import Control.Monad (when)
 type API = 
   "api" :> 
     (    "health" :> Get '[JSON] NoContent
-    :<|> "auth" :> "wallet" :> ReqBody '[JSON] Auth.WalletAuthRequest :> Post '[JSON] Auth.LoginResponse
-    :<|> Auth (Auth '[JWT] Auth.AuthenticatedUser) :> "create-csg" :> ReqBody '[JSON] CreateCSGRequest :> Post '[JSON] CSG
-    :<|> Auth (Auth '[JWT] Auth.AuthenticatedUser) :> "join-csg" :> Capture "csgId" T.Text :> ReqBody '[JSON] JoinCSGRequest :> Post '[JSON] CSG
-    :<|> Auth (Auth '[JWT] Auth.AuthenticatedUser) :> "claim-reward" :> Capture "csgId" T.Text :> ReqBody '[JSON] ClaimRewardRequest :> Post '[JSON] CSG
-    :<|> Auth (Auth '[JWT] Auth.AuthenticatedUser) :> "close-csg" :> Capture "csgId" T.Text :> Post '[JSON] CSG
-    :<|> Auth (Auth '[JWT] Auth.AuthenticatedUser) :> "list-csgs" :> Get '[JSON] [CSG]
-    :<|> Auth (Auth '[JWT] Auth.AuthenticatedUser) :> "withdraw" :> Capture "csgId" T.Text :> ReqBody '[JSON] WithdrawRequest :> Post '[JSON] CSG
+    :<|> "create-csg" :> ReqBody '[JSON] CreateCSGRequest :> Post '[JSON] CSG
+    :<|> "join-csg" :> Capture "csgId" T.Text :> ReqBody '[JSON] JoinCSGRequest :> Post '[JSON] CSG
+    :<|> "claim-reward" :> Capture "csgId" T.Text :> ReqBody '[JSON] ClaimRewardRequest :> Post '[JSON] CSG
+    :<|> "close-csg" :> Capture "csgId" T.Text :> Post '[JSON] CSG
+    :<|> "list-csgs" :> Get '[JSON] [CSG]
+    :<|> "withdraw" :> Capture "csgId" T.Text :> ReqBody '[JSON] WithdrawRequest :> Post '[JSON] CSG
     )
 
 api :: Proxy API
 api = Proxy
 
-server :: Connection -> JWTSettings -> Server API
-server conn jwtCfg = healthCheck
-         :<|> walletAuthEndpoint
+server :: Connection -> Server API
+server conn = healthCheck
          :<|> createCSG
          :<|> joinCSG
          :<|> claimReward
@@ -63,20 +59,8 @@ server conn jwtCfg = healthCheck
     healthCheck :: Handler NoContent
     healthCheck = return NoContent
     
-    walletAuthEndpoint :: Auth.WalletAuthRequest -> Handler Auth.LoginResponse
-    walletAuthEndpoint walletReq = do
-      result <- liftIO $ Auth.authenticateWallet conn walletReq
-      case result of
-        Left err -> throwError err400 { errBody = L8.pack err }
-        Right user -> do
-          maybeToken <- liftIO $ Auth.generateJWT jwtCfg user
-          case maybeToken of
-            Nothing -> throwError err500 { errBody = L8.pack "Failed to generate JWT token" }
-            Just token -> return $ Auth.LoginResponse token user
-    
-    createCSG :: Auth.AuthResult -> CreateCSGRequest -> Handler CSG
-    createCSG authResult CreateCSGRequest{..} = do
-      user <- Auth.requireAuth authResult
+    createCSG :: CreateCSGRequest -> Handler CSG
+    createCSG CreateCSGRequest{..} = do
       
       -- Input validation
       when (T.null createCsgName || T.length createCsgName < 3) $
@@ -97,17 +81,15 @@ server conn jwtCfg = healthCheck
       -- Generate contract address for this CSG
       let contractAddress = Cardano.generateCSGAddress csgId
       
-      -- Store CSG in database with authenticated user as owner
+      -- Store CSG in database
       _ <- liftIO $ PG.execute conn 
         "INSERT INTO csgs (id, name, contract_address, stake_amount, duration, start_time, end_time, status, owner_address) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
-        (csgId, createCsgName, contractAddress, createCsgStakeAmount, createCsgDuration, currentTime, endTime, "Active" :: T.Text, Auth.getUserAddress user)
+        (csgId, createCsgName, contractAddress, createCsgStakeAmount, createCsgDuration, currentTime, endTime, "Active" :: T.Text, "0x0000000000000000000000000000000000000000") -- Placeholder for owner_address
       
       return $ CSG csgId createCsgName [] createCsgStakeAmount createCsgDuration currentTime endTime "Active"
 
-    joinCSG :: Auth.AuthResult -> T.Text -> JoinCSGRequest -> Handler CSG
-    joinCSG authResult csgId JoinCSGRequest{..} = do
-      user <- Auth.requireAuth authResult
-      let userAddress = Auth.getUserAddress user
+    joinCSG :: T.Text -> JoinCSGRequest -> Handler CSG
+    joinCSG csgId JoinCSGRequest{..} = do
       
       -- Input validation
       when (T.null csgId || T.length csgId < 5) $
@@ -122,7 +104,7 @@ server conn jwtCfg = healthCheck
           -- Check if user already joined this CSG
           existingParticipants <- liftIO $ PG.query conn 
             "SELECT COUNT(*) FROM csg_participants WHERE csg_id = ? AND participant_address = ?"
-            (csgId, userAddress)
+            (csgId, "0x0000000000000000000000000000000000000000") -- Placeholder for participant_address
           
           case existingParticipants of
             [(count :: Int)] | count > 0 -> 
@@ -140,7 +122,7 @@ server conn jwtCfg = healthCheck
                   -- Add participant to CSG with real user address
                   _ <- liftIO $ PG.execute conn 
                     "INSERT INTO csg_participants (csg_id, participant_address, stake_amount, join_tx_hash) VALUES (?, ?, ?, ?)"
-                    (csgId, userAddress, joinStakeAmount, txHash)
+                    (csgId, "0x0000000000000000000000000000000000000000", joinStakeAmount, txHash) -- Placeholder for participant_address
                   
                   -- Update total stake in CSG
                   _ <- liftIO $ PG.execute conn 
@@ -182,10 +164,8 @@ server conn jwtCfg = healthCheck
                     
                 Left err -> throwError err500 { errBody = L8.pack ("Join transaction failed: " ++ err) }
 
-    claimReward :: Auth.AuthResult -> T.Text -> ClaimRewardRequest -> Handler CSG
-    claimReward authResult csgId ClaimRewardRequest{..} = do
-      user <- Auth.requireAuth authResult
-      let userAddress = Auth.getUserAddress user
+    claimReward :: T.Text -> ClaimRewardRequest -> Handler CSG
+    claimReward csgId ClaimRewardRequest{..} = do
       
       -- Input validation
       when (T.null csgId || T.length csgId < 5) $
@@ -203,7 +183,7 @@ server conn jwtCfg = healthCheck
           -- Verify user is a participant
           participantRows <- liftIO $ PG.query conn 
             "SELECT stake_amount FROM csg_participants WHERE csg_id = ? AND participant_address = ?"
-            (csgId, userAddress)
+            (csgId, "0x0000000000000000000000000000000000000000") -- Placeholder for participant_address
           
           case participantRows of
             [] -> throwError err404 { errBody = L8.pack "User is not a participant in this CSG" }
@@ -226,30 +206,28 @@ server conn jwtCfg = healthCheck
                   let rewardDistribution = Cardano.calculateProportionalRewards participantList totalRewards
                   
                   -- Find this user's reward
-                  case lookup userAddress rewardDistribution of
+                  case lookup "0x0000000000000000000000000000000000000000" rewardDistribution of -- Placeholder for participant_address
                     Nothing -> throwError err404 { errBody = L8.pack "User not found in reward distribution" }
                     Just userReward -> do
                       -- Create claim transaction
-                      txResult <- liftIO $ Cardano.createClaimTransaction csgId userAddress
+                      txResult <- liftIO $ Cardano.createClaimTransaction csgId "0x0000000000000000000000000000000000000000" -- Placeholder for participant_address
                       case txResult of
                         Right txHash -> do
                           -- Record the claim transaction
                           _ <- liftIO $ PG.execute conn 
                             "INSERT INTO csg_transactions (csg_id, tx_hash, tx_type, participant_address, amount) VALUES (?, ?, ?, ?, ?)"
-                            (csgId, txHash, "CLAIM" :: T.Text, userAddress, userReward)
+                            (csgId, txHash, "CLAIM" :: T.Text, "0x0000000000000000000000000000000000000000", userReward) -- Placeholder for participant_address
                           
                           -- Record the reward as claimed
                           _ <- liftIO $ PG.execute conn 
                             "INSERT INTO csg_rewards (csg_id, participant_address, reward_amount, reward_epoch, claimed, claim_tx_hash) VALUES (?, ?, ?, ?, ?, ?)"
-                            (csgId, userAddress, userReward, 0 :: Integer, True, txHash)
+                            (csgId, "0x0000000000000000000000000000000000000000", userReward, 0 :: Integer, True, txHash) -- Placeholder for participant_address
                           
                           return csg
                         Left err -> throwError err500 { errBody = L8.pack ("Claim transaction failed: " ++ err) }
 
-    closeCSG :: Auth.AuthResult -> T.Text -> Handler CSG
-    closeCSG authResult csgId = do
-      user <- Auth.requireAuth authResult
-      let userAddress = Auth.getUserAddress user
+    closeCSG :: T.Text -> Handler CSG
+    closeCSG csgId = do
       
       -- Input validation
       when (T.null csgId || T.length csgId < 5) $
@@ -260,7 +238,7 @@ server conn jwtCfg = healthCheck
         [] -> throwError err404 { errBody = L8.pack "CSG not found" }
         (csg:_) -> do
           -- Verify user is the owner
-          when (csgOwnerAddress csg /= userAddress) $
+          when (csgOwnerAddress csg /= "0x0000000000000000000000000000000000000000") $ -- Placeholder for owner_address
             throwError err403 { errBody = L8.pack "Only the CSG owner can close it" }
           
           txResult <- liftIO $ Cardano.createCloseTransaction csgId
@@ -279,17 +257,14 @@ server conn jwtCfg = healthCheck
               return csg
             Left err -> throwError err500 { errBody = L8.pack ("Close transaction failed: " ++ err) }
 
-    listCSGs :: Auth.AuthResult -> Handler [CSG]
-    listCSGs authResult = do
-      user <- Auth.requireAuth authResult
+    listCSGs :: Handler [CSG]
+    listCSGs = do
       
       csgRows <- liftIO $ PG.query_ conn "SELECT id, name, stake_amount, duration, start_time, end_time, status FROM csgs WHERE status = 'Active'"
       return csgRows
 
-    withdraw :: Auth.AuthResult -> T.Text -> WithdrawRequest -> Handler CSG
-    withdraw authResult csgId WithdrawRequest{..} = do
-      user <- Auth.requireAuth authResult
-      let userAddress = Auth.getUserAddress user
+    withdraw :: T.Text -> WithdrawRequest -> Handler CSG
+    withdraw csgId WithdrawRequest{..} = do
       
       -- Input validation
       when (T.null csgId || T.length csgId < 5) $
@@ -304,7 +279,7 @@ server conn jwtCfg = healthCheck
           -- Verify user is a participant
           participantRows <- liftIO $ PG.query conn 
             "SELECT stake_amount FROM csg_participants WHERE csg_id = ? AND participant_address = ?"
-            (csgId, userAddress)
+            (csgId, "0x0000000000000000000000000000000000000000") -- Placeholder for participant_address
           
           case participantRows of
             [] -> throwError err404 { errBody = L8.pack "User is not a participant in this CSG" }
@@ -312,18 +287,18 @@ server conn jwtCfg = healthCheck
               when (withdrawAmount > userStake) $
                 throwError err400 { errBody = L8.pack "Cannot withdraw more than staked amount" }
               
-              txResult <- liftIO $ Cardano.createWithdrawTransaction csgId userAddress withdrawAmount
+              txResult <- liftIO $ Cardano.createWithdrawTransaction csgId "0x0000000000000000000000000000000000000000" withdrawAmount -- Placeholder for participant_address
               case txResult of
                 Right txHash -> do
                   -- Record withdrawal transaction
                   _ <- liftIO $ PG.execute conn 
                     "INSERT INTO csg_transactions (csg_id, tx_hash, tx_type, participant_address, amount) VALUES (?, ?, ?, ?, ?)"
-                    (csgId, txHash, "WITHDRAW" :: T.Text, userAddress, withdrawAmount)
+                    (csgId, txHash, "WITHDRAW" :: T.Text, "0x0000000000000000000000000000000000000000", withdrawAmount) -- Placeholder for participant_address
                   
                   -- Update participant stake
                   _ <- liftIO $ PG.execute conn 
                     "UPDATE csg_participants SET stake_amount = stake_amount - ? WHERE csg_id = ? AND participant_address = ?"
-                    (withdrawAmount, csgId, userAddress)
+                    (withdrawAmount, csgId, "0x0000000000000000000000000000000000000000") -- Placeholder for participant_address
                   
                   -- Update total CSG stake
                   _ <- liftIO $ PG.execute conn 
@@ -333,8 +308,5 @@ server conn jwtCfg = healthCheck
                   return csg
                 Left err -> throwError err500 { errBody = L8.pack ("Withdraw transaction failed: " ++ err) }
 
-app :: Connection -> Context '[CookieSettings, JWTSettings] -> Application
-app conn ctx = serveWithContext api ctx (server conn jwtCfg)
-  where
-    jwtCfg = case ctx of
-      _ :. jwtSettings :. _ -> jwtSettings
+app :: Connection -> Application
+app conn = serveWithContext api (Context []) (server conn)

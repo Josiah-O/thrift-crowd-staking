@@ -1,92 +1,114 @@
-# Cardano Configuration Guide
+# Cardano Configuration
 
-## ⚠️ Security Notice
-**NEVER commit wallet keys or API keys to git!** This guide shows how to set up environment variables securely.
+## Environment Setup
 
-## Required Environment Variables
-
-### 1. Create Local .env File
-Create a `.env` file in your project root (already in .gitignore):
+### Required Environment Variables
 
 ```bash
-# Copy and paste this, replace with your actual values:
-BLOCKFROST_PROJECT_ID=your_blockfrost_project_id_here
-CARDANO_WALLET_ADDRESS=your_wallet_address_here
+# Backend Configuration
+DATABASE_URL=postgresql://postgres:password@db:5432/thrift_crowd_staking
+BLOCKFROST_API_KEY=your_blockfrost_api_key
+CARDANO_NETWORK=preprod
+
+# Frontend Configuration  
+NEXT_PUBLIC_API_URL=http://localhost:8080
 ```
 
-### 2. Set Up Blockfrost API
-1. Go to https://blockfrost.io
-2. Create account and get a **preprod** project ID
-3. Add to your `.env` file:
+### Blockfrost API Setup
+
+1. **Create Account**: [https://blockfrost.io](https://blockfrost.io)
+2. **Generate API Key**: Create a **preprod** project for testing
+3. **Set Environment Variable**:
+   ```bash
+   export BLOCKFROST_API_KEY=preprodABC123XYZ789
    ```
-   BLOCKFROST_PROJECT_ID=preprodABC123XYZ789
-   ```
 
-### 3. Create Cardano Wallet in Codespace
+### Cardano Network Configuration
+
+The application supports multiple networks:
+- **preprod** - Testnet environment (recommended for development)
+- **mainnet** - Production environment
+
+Set via environment variable:
 ```bash
-# Create keys directory (ignored by git)
-mkdir -p keys
-
-# Generate wallet (run in Codespace terminal)
-cardano-cli address key-gen \
-  --verification-key-file keys/wallet.vkey \
-  --signing-key-file keys/wallet.skey
-
-# Generate address
-cardano-cli address build \
-  --payment-verification-key-file keys/wallet.vkey \
-  --out-file keys/wallet.addr \
-  --testnet-magic 1
-
-# Add address to .env file
-echo "CARDANO_WALLET_ADDRESS=$(cat keys/wallet.addr)" >> .env
+export CARDANO_NETWORK=preprod
 ```
 
-### 4. Fund Your Wallet
-- Use [Cardano Testnet Faucet](https://testnets.cardano.org/en/testnets/cardano/tools/faucet/)
-- Send test ADA to your wallet address: `cat keys/wallet.addr`
+## Wallet Integration
 
-### 5. Load Environment Variables
-```bash
-# Load .env file before running docker-compose
-source .env
-docker-compose up -d
-```
+### Lace Wallet Support
+- Users connect directly through Lace browser extension
+- No backend wallet management required
+- Transactions signed client-side through wallet
 
-## How Docker Compose Works
-Your `docker-compose.yml` uses environment variable references:
-```yaml
-environment:
-  - BLOCKFROST_PROJECT_ID=${BLOCKFROST_PROJECT_ID}
-  - CARDANO_WALLET_ADDRESS=${CARDANO_WALLET_ADDRESS}
-```
+### Transaction Types
 
-This pulls values from your local `.env` file without exposing them in git.
+The application creates these transaction types:
+- **CSG Creation** - Initialize new savings group contract
+- **Join CSG** - Participate in existing savings group
+- **Claim Rewards** - Withdraw accumulated staking rewards
+- **Close CSG** - End savings group and return funds
+- **Withdraw** - Early withdrawal from savings group
 
-## Production Deployment
-For production, set environment variables in your hosting platform:
+## Security
+
+### Environment Variables
+- **Never commit secrets** to version control
+- Use `.env` files for local development
+- Set environment variables in production deployment
+
+### Production Deployment
 - **GitHub Actions**: Use repository secrets
-- **Heroku**: Use config vars
-- **AWS**: Use Parameter Store or Secrets Manager
-- **Docker**: Use docker secrets
+- **Cloud Providers**: Use secure parameter stores
+- **Docker**: Use Docker secrets or environment injection
 
-## File Structure
-```
-your-project/
-├── .env                 # YOUR SECRETS (never commit!)
-├── .env.example        # Template (safe to commit)
-├── keys/               # Wallet files (never commit!)
-│   ├── wallet.skey     # Signing key
-│   ├── wallet.vkey     # Verification key
-│   └── wallet.addr     # Address
-├── docker-compose.yml  # Uses ${VARIABLE} references
-└── .gitignore          # Includes .env and keys/
+## Development Setup
+
+### Docker Compose
+```bash
+# Set environment variables
+export BLOCKFROST_API_KEY=your_key
+export CARDANO_NETWORK=preprod
+
+# Start services
+docker-compose up --build
 ```
 
-## Transaction Types
+### Local Development
+```bash
+# Backend
+cd backend
+export DATABASE_URL=postgresql://...
+export BLOCKFROST_API_KEY=...
+stack run
 
-The application creates real Cardano transactions for:
-- **Join CSG**: Sends ADA from user wallet to CSG contract address
-- **Claim Rewards**: Sends rewards from CSG contract to user address  
-- **Close CSG**: Returns all funds from CSG contract to creator
-- **Withdraw**: Sends specified amount from CSG contract to user address 
+# Frontend
+cd frontend
+npm install
+npm run dev
+```
+
+## Cardano Node Integration
+
+### Transaction Building
+- Uses `cardano-cli` for transaction construction
+- Queries UTXOs via Blockfrost API
+- Submits transactions to Cardano network
+
+### Stake Pool Selection
+- Real-time pool performance queries
+- ROA-based scoring algorithm
+- Load balancing across multiple pools
+
+## Monitoring
+
+### Key Metrics
+- Transaction success rates
+- Pool performance tracking
+- Reward distribution accuracy
+- Network sync status
+
+### Logging
+- Structured transaction logging
+- Error tracking and alerting
+- Performance monitoring 
