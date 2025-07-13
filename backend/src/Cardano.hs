@@ -24,7 +24,7 @@ import Data.Time (UTCTime, getCurrentTime, addUTCTime, diffUTCTime)
 import Data.Time.Format (formatTime, defaultTimeLocale)
 import qualified Database.PostgreSQL.Simple as PG
 import Database.PostgreSQL.Simple (Connection, Only(..))
--- import qualified CSGContract
+import qualified CSGContract
 
 -- Network configuration
 data CardanoNetwork = Testnet | Preprod | Mainnet

@@ -33,6 +33,7 @@ dependencies:
 - plutus-tx
 - plutus-tx-plugin
 - cardano-api
+- thrift-crowd-staking-contracts
 
 library:
   source-dirs: src
