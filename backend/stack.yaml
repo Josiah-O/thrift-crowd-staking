@@ -1,4 +1,4 @@
-resolver: lts-18.28
+resolver: https://raw.githubusercontent.com/input-output-hk/cardano-haskell-packages/master/snapshots/cardano-1.35.4.yaml
 
 packages:
 - .
@@ -6,3 +6,5 @@ packages:
 extra-deps:
 - servant-0.19.1
 - servant-server-0.19.2
+
+allow-newer: true
