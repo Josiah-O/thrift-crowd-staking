@@ -1,10 +1,13 @@
 # Multi-stage build for better caching and smaller final image
-FROM inputoutput/cardano-node:8.7.3 as builder
+FROM ghcr.io/blinklabs-io/cardano-node:latest as builder
 
 # Install additional dependencies needed for our build
 RUN apt-get update && \
-    apt-get install -y libpq-dev build-essential && \
+    apt-get install -y libpq-dev build-essential curl && \
     rm -rf /var/lib/apt/lists/*
+
+# Install Stack
+RUN curl -sSL https://get.haskellstack.org/ | sh
 
 WORKDIR /app
 
