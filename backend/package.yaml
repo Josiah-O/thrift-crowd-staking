@@ -26,6 +26,8 @@ dependencies:
 - bytestring
 - http-api-data
 - process
+- temporary
+- filepath
 
 library:
   source-dirs: src
