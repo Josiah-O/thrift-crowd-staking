@@ -10,6 +10,7 @@ import Network.Wai.Middleware.Cors
 import Database.PostgreSQL.Simple
 import Servant
 import API (app)
+import qualified Auth
 import CSG (CSG(..), CreateCSGRequest(..))
 import Data.Text (Text)
 import Data.Time (UTCTime)
@@ -38,12 +39,27 @@ main = do
   -- Initialize database schema
   initializeDatabase conn
   
+  -- Get authentication context
+  authCtx <- Auth.authContext
+  
   let corsPolicy = simpleCorsResourcePolicy 
         { corsOrigins = Just (["http://localhost:3000"], True)
         , corsMethods = ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
         , corsRequestHeaders = ["Authorization", "Content-Type"]
         }
-  run 8080 $ cors (const $ Just corsPolicy) $ app conn
+  
+  putStrLn "Available endpoints:"
+  putStrLn "  POST /api/auth/wallet - Authenticate with wallet (wallet-only)"
+  putStrLn "  POST /api/create-csg - Create new CSG (auth required)"
+  putStrLn "  POST /api/join-csg/{id} - Join CSG (auth required)"
+  putStrLn "  POST /api/claim-reward/{id} - Claim rewards (auth required)"
+  putStrLn "  POST /api/close-csg/{id} - Close CSG (auth required)"
+  putStrLn "  GET /api/list-csgs - List active CSGs (auth required)"
+  putStrLn "  POST /api/withdraw/{id} - Withdraw from CSG (auth required)"
+  putStrLn ""
+  putStrLn "Authentication: Include 'Authorization: Bearer <token>' header for protected endpoints"
+  
+  run 8080 $ cors (const $ Just corsPolicy) $ app conn authCtx
 
 -- Wait for database to be available with retry logic
 waitForDatabase :: BS.ByteString -> Int -> IO Connection
@@ -68,6 +84,10 @@ waitForDatabase connStr maxRetries = go maxRetries
 initializeDatabase :: Connection -> IO ()
 initializeDatabase conn = do
   putStrLn "Initializing database..."
+  
+  -- Create users table first
+  Auth.createUserTable conn
+  
   _ <- execute_ conn $ fromString $ unlines
     [ "CREATE TABLE IF NOT EXISTS csgs ("
     , "    id VARCHAR(64) PRIMARY KEY,"
@@ -78,8 +98,18 @@ initializeDatabase conn = do
     , "    start_time TIMESTAMP NOT NULL,"
     , "    end_time TIMESTAMP NOT NULL,"
     , "    status VARCHAR(50) NOT NULL,"
-    , "    participants TEXT[] DEFAULT '{}',"
+    , "    owner_address VARCHAR(255),"  -- Add owner_address field
+    , "    pool_id VARCHAR(64),"
+    , "    delegation_tx_hash VARCHAR(128),"
     , "    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
+    , ");"
+    , "CREATE TABLE IF NOT EXISTS csg_participants ("
+    , "    id SERIAL PRIMARY KEY,"
+    , "    csg_id VARCHAR(64) REFERENCES csgs(id),"
+    , "    participant_address VARCHAR(255) NOT NULL,"
+    , "    stake_amount BIGINT NOT NULL,"
+    , "    join_tx_hash VARCHAR(128) NOT NULL,"
+    , "    joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
     , ");"
     , "CREATE TABLE IF NOT EXISTS csg_transactions ("
     , "    id SERIAL PRIMARY KEY,"
@@ -90,5 +120,29 @@ initializeDatabase conn = do
     , "    amount BIGINT,"
     , "    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
     , ");"
+    , "CREATE TABLE IF NOT EXISTS csg_rewards ("
+    , "    id SERIAL PRIMARY KEY,"
+    , "    csg_id VARCHAR(64) REFERENCES csgs(id),"
+    , "    participant_address VARCHAR(255) NOT NULL,"
+    , "    reward_amount BIGINT NOT NULL,"
+    , "    reward_epoch INTEGER NOT NULL,"
+    , "    claimed BOOLEAN DEFAULT FALSE,"
+    , "    claim_tx_hash VARCHAR(128),"
+    , "    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP"
+    , ");"
+    , "CREATE INDEX IF NOT EXISTS idx_csgs_status ON csgs(status);"
+    , "CREATE INDEX IF NOT EXISTS idx_csgs_pool_id ON csgs(pool_id);"
+    , "CREATE INDEX IF NOT EXISTS idx_csgs_owner ON csgs(owner_address);"  -- Add owner index
+    , "CREATE INDEX IF NOT EXISTS idx_csg_participants_csg_id ON csg_participants(csg_id);"
+    , "CREATE INDEX IF NOT EXISTS idx_csg_participants_address ON csg_participants(participant_address);"
+    , "CREATE INDEX IF NOT EXISTS idx_csg_transactions_csg_id ON csg_transactions(csg_id);"
+    , "CREATE INDEX IF NOT EXISTS idx_csg_transactions_tx_hash ON csg_transactions(tx_hash);"
+    , "CREATE INDEX IF NOT EXISTS idx_csg_rewards_csg_id ON csg_rewards(csg_id);"
+    , "CREATE INDEX IF NOT EXISTS idx_csg_rewards_participant ON csg_rewards(participant_address);"
+    , "CREATE INDEX IF NOT EXISTS idx_csg_rewards_claimed ON csg_rewards(claimed);"
     ]
+  
+  -- Add owner_address column to existing CSGs table if it doesn't exist
+  _ <- execute_ conn "ALTER TABLE csgs ADD COLUMN IF NOT EXISTS owner_address VARCHAR(255);"
+  
   putStrLn "Database initialized successfully"

@@ -18,12 +18,13 @@ data CSG = CSG
   , csgStartTime :: UTCTime
   , csgEndTime :: UTCTime
   , csgStatus :: Text
+  , csgOwnerAddress :: Text
   } deriving (Show, Generic)
 
 instance ToJSON CSG
 instance FromJSON CSG
 
--- Database instance - matches SQL query: "SELECT id, name, stake_amount, duration, start_time, end_time, status FROM csgs"
+-- Database instance - matches SQL query: "SELECT id, name, stake_amount, duration, start_time, end_time, status, owner_address FROM csgs"
 instance FromRow CSG where
   fromRow = CSG <$> field          -- id -> csgId
                 <*> field          -- name -> csgName
@@ -33,6 +34,7 @@ instance FromRow CSG where
                 <*> field          -- start_time -> csgStartTime
                 <*> field          -- end_time -> csgEndTime
                 <*> field          -- status -> csgStatus
+                <*> field          -- owner_address -> csgOwnerAddress
 
 data CreateCSGRequest = CreateCSGRequest
   { createCsgName :: Text
@@ -50,16 +52,18 @@ data JoinCSGRequest = JoinCSGRequest
 instance ToJSON JoinCSGRequest
 instance FromJSON JoinCSGRequest
 
+-- ClaimRewardRequest no longer needs claimantAddress - it comes from JWT token
 data ClaimRewardRequest = ClaimRewardRequest
-  { claimantAddress :: Text
+  { -- No fields needed - user address comes from JWT token
   } deriving (Show, Generic)
 
 instance ToJSON ClaimRewardRequest
 instance FromJSON ClaimRewardRequest
 
+-- WithdrawRequest no longer needs withdrawAddress - it comes from JWT token
 data WithdrawRequest = WithdrawRequest
   { withdrawAmount :: Integer
-  , withdrawAddress :: Text
+  -- withdrawAddress removed - comes from JWT token
   } deriving (Show, Generic)
 
 instance ToJSON WithdrawRequest

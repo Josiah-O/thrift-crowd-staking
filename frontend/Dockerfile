@@ -1,35 +1,22 @@
-FROM node:16
+FROM node:18-alpine
 
-# Create app directory
 WORKDIR /app
 
-# Create a non-root user
-RUN groupadd -r appuser && useradd -r -g appuser appuser
+# Copy package files
+COPY package.json pnpm-lock.yaml* ./
 
-# Copy package.json and package-lock.json (if available)
-COPY package*.json ./
+# Install dependencies
+RUN npm install -g pnpm
+RUN pnpm install
 
-# Copy tailwind.config.js
-COPY tailwind.config.js ./
-
-# Install dependencies as root first
-RUN npm install
-
-# Copy the rest of the application code
+# Copy source code
 COPY . .
 
-# Create and set permissions for cache directory
-RUN mkdir -p /app/node_modules/.cache && \
-    chown -R appuser:appuser /app && \
-    chmod -R 755 /app
+# Build the application
+RUN pnpm build
 
-# Copy and set permissions for start script
-COPY start.sh /start.sh
-RUN chmod +x /start.sh && chown appuser:appuser /start.sh
-
-# Switch to non-root user
-USER appuser
-
+# Expose port
 EXPOSE 3000
 
-CMD ["/start.sh"]
+# Start the application
+CMD ["pnpm", "start"] 
