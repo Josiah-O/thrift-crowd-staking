@@ -37,7 +37,6 @@ FROM ubuntu:20.04
 # Install system dependencies for runtime
 RUN apt-get update && \
     apt-get install -y libpq5 ca-certificates curl gnupg && \
-    curl -fsSL https://git.io/git-extras-setup | bash && \
     rm -rf /var/lib/apt/lists/*
 
 # Install Node.js 18.x
