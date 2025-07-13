@@ -1,14 +1,9 @@
 # Multi-stage build for better caching and smaller final image
-FROM haskell:9.2.8 as builder
+FROM inputoutput/cardano-node:8.7.3 as builder
 
-# Fix Debian Buster archived repositories
-RUN sed -i 's/deb.debian.org/archive.debian.org/g' /etc/apt/sources.list && \
-    sed -i 's/security.debian.org/archive.debian.org/g' /etc/apt/sources.list && \
-    sed -i '/stretch-updates/d' /etc/apt/sources.list
-
-# Install system dependencies
+# Install additional dependencies needed for our build
 RUN apt-get update && \
-    apt-get install -y libpq-dev && \
+    apt-get install -y libpq-dev build-essential && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
