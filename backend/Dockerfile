@@ -21,12 +21,16 @@ COPY smart-contracts/ ../smart-contracts/
 # Copy source code
 COPY backend/src/ src/
 
+# Set GHC memory optimizations to reduce memory usage
+ENV GHC_OPTS="-j1 +RTS -M4G -RTS"
+ENV STACK_OPTS="--jobs=1"
+
 # Install GHC and dependencies
 RUN stack setup --install-ghc
-RUN stack build --dependencies-only
+RUN stack build --dependencies-only $STACK_OPTS
 
 # Build the application
-RUN stack build
+RUN stack build $STACK_OPTS
 
 # Stage 2: Runtime stage using IOG's official image
 FROM ghcr.io/intersectmbo/cardano-node:10.3.1
