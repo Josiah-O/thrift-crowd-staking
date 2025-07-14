@@ -10,9 +10,6 @@ RUN apt-get update && apt-get install -y \
     gnupg \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Stack
-RUN curl -sSL https://get.haskellstack.org/ | sh
-
 WORKDIR /app
 
 # Copy Stack files first for caching
