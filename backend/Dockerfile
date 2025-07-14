@@ -11,6 +11,8 @@ RUN apt-get update && apt-get install -y \
     libsodium-dev \
     git \
     cmake \
+    automake \
+    libtool \
     && rm -rf /var/lib/apt/lists/*
 
 # Install BLST from source (required for cardano-crypto-class)
@@ -32,6 +34,16 @@ RUN git clone https://github.com/supranational/blst.git /tmp/blst \
     && echo "Cflags: -I\${includedir}" >> /usr/local/lib/pkgconfig/libblst.pc \
     && echo "Libs: -L\${libdir} -lblst" >> /usr/local/lib/pkgconfig/libblst.pc \
     && rm -rf /tmp/blst
+
+# Install libsecp256k1 from source (required for cardano-crypto-class)
+RUN git clone https://github.com/bitcoin-core/secp256k1 /tmp/secp256k1 \
+    && cd /tmp/secp256k1 \
+    && git checkout ac83be33 \
+    && ./autogen.sh \
+    && ./configure --enable-module-recovery --enable-experimental --enable-module-schnorrsig \
+    && make \
+    && make install \
+    && rm -rf /tmp/secp256k1
 
 WORKDIR /app
 
