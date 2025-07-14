@@ -9,7 +9,7 @@ extra-deps:
 - servant-server-0.19.2
 - cardano-crypto-1.3.0@sha256:a4de03348156cd85676489fdb5505ca2b3c8eff7e725cccbff5b124d62329bbc,5148
 - crypton-1.0.4@sha256:353391cc2cc583cf5e44c35c46b7a548a218037f2249c40a9712e00d7c46580c,14513
-- cryptonite-0.27
+- cryptonite-0.30
 - dom-lt-0.2.3@sha256:1df9402e21e97de0da74fdf2a9f8c96ab8a710c602eb6d22ac8e9c274db51090,1938
 - flat-0.6@sha256:fbb17e2ae8ec5a7e02d74b505178b92ceb19ef991054c625ea570d33a595dfa3,7464
 - lazy-search-0.1.3.0@sha256:7585b6cac1bf24ece7dea2273b7cd48b01f87314b39c2abb356e7cfb6ac2af90,1239
