@@ -1,5 +1,5 @@
 # Stage 1: Use IOG's pre-built image with all crypto dependencies
-FROM inputoutput/cardano-node:8.7.3 as builder
+FROM inputoutput/cardano-node:latest as builder
 
 # Install additional system dependencies (if needed)
 RUN apt-get update && apt-get install -y \
