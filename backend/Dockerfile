@@ -21,6 +21,7 @@ RUN git clone https://github.com/supranational/blst.git /tmp/blst \
     && ./build.sh \
     && cp libblst.a /usr/local/lib/ \
     && cp bindings/blst.h /usr/local/include/ \
+    && cp bindings/blst_aux.h /usr/local/include/ \
     && mkdir -p /usr/local/lib/pkgconfig \
     && echo "prefix=/usr/local" > /usr/local/lib/pkgconfig/libblst.pc \
     && echo "exec_prefix=\${prefix}" >> /usr/local/lib/pkgconfig/libblst.pc \
