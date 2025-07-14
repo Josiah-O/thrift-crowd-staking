@@ -19,17 +19,20 @@ RUN git clone https://github.com/supranational/blst.git /tmp/blst \
     && ./build.sh \
     && cp libblst.a /usr/local/lib/ \
     && cp bindings/blst.h /usr/local/include/ \
-    && echo "prefix=/usr/local" > /usr/local/lib/pkgconfig/libblst.pc \
-    && echo "exec_prefix=\${prefix}" >> /usr/local/lib/pkgconfig/libblst.pc \
-    && echo "libdir=\${exec_prefix}/lib" >> /usr/local/lib/pkgconfig/libblst.pc \
-    && echo "includedir=\${prefix}/include" >> /usr/local/lib/pkgconfig/libblst.pc \
-    && echo "" >> /usr/local/lib/pkgconfig/libblst.pc \
-    && echo "Name: libblst" >> /usr/local/lib/pkgconfig/libblst.pc \
-    && echo "Description: Multilingual BLS12-381 signature library" >> /usr/local/lib/pkgconfig/libblst.pc \
-    && echo "URL: https://github.com/supranational/blst" >> /usr/local/lib/pkgconfig/libblst.pc \
-    && echo "Version: 0.3.11" >> /usr/local/lib/pkgconfig/libblst.pc \
-    && echo "Cflags: -I\${includedir}" >> /usr/local/lib/pkgconfig/libblst.pc \
-    && echo "Libs: -L\${libdir} -lblst" >> /usr/local/lib/pkgconfig/libblst.pc \
+    && mkdir -p /usr/local/lib/pkgconfig \
+    && cat > /usr/local/lib/pkgconfig/libblst.pc <<EOF
+prefix=/usr/local
+exec_prefix=\${prefix}
+libdir=\${exec_prefix}/lib
+includedir=\${prefix}/include
+
+Name: libblst
+Description: Multilingual BLS12-381 signature library
+URL: https://github.com/supranational/blst
+Version: 0.3.11
+Cflags: -I\${includedir}
+Libs: -L\${libdir} -lblst
+EOF \
     && rm -rf /tmp/blst
 
 WORKDIR /app
