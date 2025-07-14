@@ -5,8 +5,6 @@ packages:
 - ../smart-contracts
 
 extra-deps:
-- servant-0.19.1
-- servant-server-0.19.2
 # Git-based dependencies needed for smart-contracts package in workspace
 - git: https://github.com/IntersectMBO/plutus
   commit: 75267027f157f1312964e7126280920d1245c52d
@@ -16,38 +14,17 @@ extra-deps:
     - plutus-tx
     - plutus-tx-plugin
     - prettyprinter-configurable
+# Try using just one cardano-base repo
 - git: https://github.com/IntersectMBO/cardano-base
-  commit: 75267027f157f1312964e7126280920d1245c52d
+  commit: f11ddc7f87038c16d5a6d7611fb5dda51be9533d
   subdirs:
-    - base-deriving-via
-    - base16-bytestring
-    - cardano-crypto-class
-    - cardano-crypto-praos
-    - cardano-crypto-tests
-    - cardano-strict-containers
-    - cardano-strict-containers-test
-    - strict-containers
-- git: https://github.com/IntersectMBO/cardano-prelude
-  commit: 75267027f157f1312964e7126280920d1245c52d
-  subdirs:
-    - cardano-prelude
-    - cardano-prelude-test
-- git: https://github.com/IntersectMBO/cardano-crypto
-  commit: 75267027f157f1312964e7126280920d1245c52d
-  subdirs:
-    - cardano-crypto
-- git: https://github.com/IntersectMBO/cardano-binary
-  commit: 75267027f157f1312964e7126280920d1245c52d
-  subdirs:
-    - binary
     - cardano-binary
-    - cardano-binary-test
-- git: https://github.com/IntersectMBO/cardano-strict-containers
-  commit: 75267027f157f1312964e7126280920d1245c52d
-  subdirs:
-    - strict-containers
-    - strict-containers-test
+    - cardano-crypto-class
+    - heapwords
+    - cardano-strict-containers
 
 allow-newer: true
 
-
+flags:
+  cardano-crypto-class:
+    secp256k1-support: true
