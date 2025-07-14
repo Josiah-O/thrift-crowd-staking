@@ -1,16 +1,21 @@
-# Stage 1: Use IOG's pre-built image with all crypto dependencies
-FROM inputoutput/cardano-node:latest as builder
+# Stage 1: Use Haskell image with crypto libraries
+FROM haskell:9.2.8 as builder
 
-# Install additional system dependencies (if needed)
+# Install system dependencies including crypto libraries
 RUN apt-get update && apt-get install -y \
     libpq-dev \
+    libsodium-dev \
     pkg-config \
     build-essential \
     curl \
     gnupg \
+    git \
+    libtool \
+    autoconf \
+    automake \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Node.js 18.x (if needed)
+# Install Node.js 18.x
 RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
     && apt-get install -y nodejs
 
