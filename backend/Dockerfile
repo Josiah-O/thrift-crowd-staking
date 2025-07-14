@@ -1,5 +1,5 @@
 # Stage 1: Build stage with proper Haskell environment
-FROM haskell:9.4 as builder
+FROM haskell:9.6 as builder
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
