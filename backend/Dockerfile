@@ -9,8 +9,16 @@ RUN apt-get update && apt-get install -y \
     curl \
     gnupg \
     libsodium-dev \
-    libblst-dev \
+    git \
+    cmake \
     && rm -rf /var/lib/apt/lists/*
+
+# Install BLST from source (required for cardano-crypto-class)
+RUN git clone https://github.com/supranational/blst.git /tmp/blst \
+    && cd /tmp/blst \
+    && make \
+    && make install \
+    && rm -rf /tmp/blst
 
 WORKDIR /app
 
