@@ -1,7 +1,7 @@
-# Stage 1: Use IOG's pre-built image with all crypto dependencies
-FROM ghcr.io/intersectmbo/cardano-node:10.5.0 as builder
+# Stage 1: Build stage with proper Haskell environment
+FROM haskell:9.4 as builder
 
-# Install additional system dependencies (if needed)
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
     libpq-dev \
     pkg-config \
@@ -10,9 +10,8 @@ RUN apt-get update && apt-get install -y \
     gnupg \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Node.js 18.x (if needed)
-RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
-    && apt-get install -y nodejs
+# Install Stack
+RUN curl -sSL https://get.haskellstack.org/ | sh
 
 WORKDIR /app
 
@@ -32,17 +31,20 @@ RUN stack build --dependencies-only
 # Build the application
 RUN stack build
 
-# Stage 2: Minimal runtime image
-FROM ubuntu:20.04
+# Stage 2: Runtime stage using IOG's official image
+FROM ghcr.io/intersectmbo/cardano-node:10.3.1
 
-# Install runtime dependencies (PostgreSQL, etc.)
-RUN apt-get update && apt-get install -y \
-    libpq5 \
-    ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
+# Install runtime dependencies (PostgreSQL client libraries)
+# Note: This image is Nix-based, so we need to use nix-env or similar
+# For now, we'll copy the binary and use a minimal runtime approach
 
 # Copy the built binary from the builder stage
 COPY --from=builder /app/.stack-work/install/x86_64-linux/*/*/bin/thrift-crowd-staking-exe /usr/local/bin/
+
+# Create a simple entrypoint script
+RUN echo '#!/bin/sh' > /usr/local/bin/start-app && \
+    echo 'exec thrift-crowd-staking-exe' >> /usr/local/bin/start-app && \
+    chmod +x /usr/local/bin/start-app
 
 # Create non-root user
 RUN adduser --disabled-password --gecos '' appuser
@@ -50,4 +52,6 @@ USER appuser
 
 WORKDIR /app
 EXPOSE 8080
-CMD ["thrift-crowd-staking-exe"]
+
+# Override the default entrypoint to run our app instead of cardano-node
+ENTRYPOINT ["/usr/local/bin/start-app"]

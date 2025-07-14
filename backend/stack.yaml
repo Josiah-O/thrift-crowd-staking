@@ -4,8 +4,10 @@ packages:
 - .
 - ../smart-contracts
 
+# Remove problematic git-based crypto dependencies
+# Use official packages from Stackage instead
 extra-deps:
-# Git-based dependencies needed for smart-contracts package in workspace
+# Only include essential Plutus dependencies
 - git: https://github.com/IntersectMBO/plutus
   commit: 75267027f157f1312964e7126280920d1245c52d
   subdirs:
@@ -13,18 +15,10 @@ extra-deps:
     - plutus-ledger-api
     - plutus-tx
     - plutus-tx-plugin
-    - prettyprinter-configurable
-# Try using just one cardano-base repo
-- git: https://github.com/IntersectMBO/cardano-base
-  commit: f11ddc7f87038c16d5a6d7611fb5dda51be9533d
-  subdirs:
-    - cardano-binary
-    - cardano-crypto-class
-    - heapwords
-    - cardano-strict-containers
 
 allow-newer: true
 
-flags:
-  cardano-crypto-class:
-    secp256k1-support: true
+# Remove problematic crypto flags
+# flags:
+#   cardano-crypto-class:
+#     secp256k1-support: true
