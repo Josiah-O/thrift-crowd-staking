@@ -8,6 +8,7 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     curl \
     gnupg \
+    libsodium-dev \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -22,7 +23,7 @@ COPY smart-contracts/ ../smart-contracts/
 COPY backend/src/ src/
 
 # Set GHC memory optimizations to reduce memory usage
-ENV GHC_OPTS="-j1 +RTS -M4G -RTS"
+ENV GHC_OPTS="-j1 +RTS -M2G -A64m -RTS"
 ENV STACK_OPTS="--jobs=1"
 
 # Install GHC and dependencies
