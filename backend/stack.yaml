@@ -25,11 +25,12 @@ extra-deps:
     - heapwords
     - cardano-strict-containers
 
-# Additional dependencies from error message
+# Additional dependencies from error messages
 - cardano-crypto-1.3.0@sha256:a4de03348156cd85676489fdb5505ca2b3c8eff7e725cccbff5b124d62329bbc,5148
 - dependent-sum-template-0.2.0.2@sha256:ba563412208bd099a347223dcf9b37df75dfe8a0c9491d6f2d509c6d09691169,2208
 - dom-lt-0.2.3@sha256:1df9402e21e97de0da74fdf2a9f8c96ab8a710c602eb6d22ac8e9c274db51090,1938
 - lazy-search-0.1.3.0@sha256:7585b6cac1bf24ece7dea2273b7cd48b01f87314b39c2abb356e7cfb6ac2af90,1239
+- io-classes-1.8.0.1@sha256:84117906a73f36377b86684abb2b1d344ce74fd0737c1ceda85e5875cbd378a1,8593
 
 allow-newer: true
 
