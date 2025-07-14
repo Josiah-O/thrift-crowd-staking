@@ -16,8 +16,9 @@ RUN apt-get update && apt-get install -y \
 # Install BLST from source (required for cardano-crypto-class)
 RUN git clone https://github.com/supranational/blst.git /tmp/blst \
     && cd /tmp/blst \
-    && make \
-    && make install \
+    && ./build.sh \
+    && cp libblst.a /usr/local/lib/ \
+    && cp bindings/blst.h /usr/local/include/ \
     && rm -rf /tmp/blst
 
 WORKDIR /app
