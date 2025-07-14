@@ -22,6 +22,9 @@ extra-deps:
 - dom-lt-0.2.3@sha256:1df9402e21e97de0da74fdf2a9f8c96ab8a710c602eb6d22ac8e9c274db51090,1938
 - lazy-search-0.1.3.0@sha256:7585b6cac1bf24ece7dea2273b7cd48b01f87314b39c2abb356e7cfb6ac2af90,1239
 
+# Add cardano-crypto-class from CHaP
+- cardano-crypto-class-2.1.5.0
+
 allow-newer: true
 
 # Remove problematic crypto flags
