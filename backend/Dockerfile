@@ -44,6 +44,7 @@ RUN git clone https://github.com/bitcoin-core/secp256k1 /tmp/secp256k1 \
     && ./configure --enable-module-recovery --enable-experimental --enable-module-schnorrsig \
     && make \
     && make install \
+    && ldconfig \
     && rm -rf /tmp/secp256k1
 
 WORKDIR /app
