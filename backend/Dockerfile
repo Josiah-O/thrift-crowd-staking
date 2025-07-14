@@ -2,16 +2,17 @@
 FROM ghcr.io/intersectmbo/cardano-node:10.5.0 as builder
 
 # Install additional system dependencies (if needed)
-RUN apk update && apk add \
-    postgresql-dev \
-    pkgconfig \
-    build-base \
+RUN apt-get update && apt-get install -y \
+    libpq-dev \
+    pkg-config \
+    build-essential \
     curl \
     gnupg \
-    && rm -rf /var/cache/apk/*
+    && rm -rf /var/lib/apt/lists/*
 
 # Install Node.js 18.x (if needed)
-RUN apk add --no-cache nodejs npm
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+    && apt-get install -y nodejs
 
 WORKDIR /app
 
