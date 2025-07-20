@@ -1,128 +1,163 @@
-# Thrift Crowd Staking - Technical Guide
+# Thrift Crowd Staking - Technical Documentation
 
-## Architecture Overview
-Thrift Crowd Staking is a decentralized application (dApp) built on the Cardano blockchain. It consists of three main components:
-1. Smart Contracts (Plutus)
-2. Backend API (Haskell)
-3. Frontend (React)
+## Overview
+Thrift Crowd Staking is a decentralized Community Savings Groups (CSG) platform built on Cardano. It enables trustless, permissionless savings groups through blockchain technology and real Cardano staking rewards.
+
+## Architecture
+
+### Core Components
+1. **Smart Contracts** (Plutus) - On-chain validation and fund management
+2. **Backend API** (Haskell) - Cardano node interface and data indexing  
+3. **Frontend** (Next.js) - User interface with Lace wallet integration
+
+### Key Features
+- **Wallet-Only Authentication** - No KYC, no personal data collection
+- **Real Cardano Staking** - Actual delegation to stake pools with real rewards
+- **Load-Balanced Pool Selection** - Distributes CSGs across multiple pools
+- **Smart Contract Enforcement** - All rules enforced on-chain
 
 ## Smart Contracts
-- Language: Plutus (Haskell-based)
-- Key Files: 
-  - smart-contracts/src/CSGContract.hs
-  - smart-contracts/test/CSGContractSpec.hs
 
-### Key Functions:
-- alidateCSG: Main validator function for CSG operations
-- alidateJoin: Validates joining a CSG
-- alidateClaimReward: Validates reward claims
-- alidateEndCycle: Validates ending a CSG cycle
+**Location**: `backend/src/CSGContract.hs`
 
-### Deployment:
-- Use Cardano CLI for contract compilation and deployment
-- Store contract address securely for backend integration
+### Core Functions
+- `validateCSG` - Main validator for CSG operations
+- `validateJoin` - Validates participant joining
+- `validateClaimReward` - Validates reward claims
+- `scrAddress` - Contract script address
 
 ## Backend API
-- Language: Haskell
-- Framework: Servant
-- Database: PostgreSQL
-- Key Files:
-  - ackend/src/Main.hs
-  - ackend/src/CSG.hs
-  - ackend/src/API.hs
 
-### API Endpoints:
-- POST /csg/create
-- POST /csg/join/{csgId}
-- POST /csg/claim/{csgId}
-- POST /csg/end/{csgId}
-- GET /csg/list
-- GET /csg/{csgId}
+**Framework**: Servant (Haskell)  
+**Database**: PostgreSQL  
+**Key Files**:
+- `backend/src/Main.hs` - Application entry point
+- `backend/src/API.hs` - REST API endpoints  
+- `backend/src/CSG.hs` - CSG business logic
+- `backend/src/Cardano.hs` - Blockchain integration
 
-### Key Components:
-- CSG Management: Handling CSG creation, joining, and lifecycle
-- Blockchain Interaction: Integrating with Cardano node for contract interactions
-- User Authentication: JWT-based authentication system
-- Database Operations: CRUD operations for CSGs and user data
+### API Endpoints
+```
+GET  /api/health          - Health check
+POST /api/create-csg      - Create new CSG
+POST /api/join-csg/{id}   - Join existing CSG
+POST /api/claim-reward/{id} - Claim staking rewards
+POST /api/close-csg/{id}  - Close CSG
+GET  /api/list-csgs       - List active CSGs
+POST /api/withdraw/{id}   - Withdraw funds
+```
+
+### Cardano Integration
+- **Blockfrost API** - Pool data and reward queries
+- **cardano-cli** - Transaction building and submission
+- **Real UTXO Management** - Queries and selects actual UTXOs
+- **Pool Selection Algorithm** - ROA-based scoring with load balancing
 
 ## Frontend
-- Framework: React
-- State Management: Redux
-- Key Files:
-  - rontend/src/App.js
-  - rontend/src/components/*.js
-  - rontend/src/api/api.js
 
-### Key Components:
-- Home: Dashboard displaying active CSGs and user balance
-- CreateCSG: Form for creating new CSGs
-- JoinCSG: Interface for browsing and joining existing CSGs
-- CSGDetails: Detailed view of a specific CSG with participant info
+**Framework**: Next.js 14 (React)  
+**Wallet**: Lace integration  
+**UI**: Tailwind CSS + shadcn/ui  
 
-## Development Setup
-1. Smart Contracts:
-   - Install Cardano development environment (node, cli, etc.)
-   - Use cabal build to compile contracts
-   - Use Plutus Playground for initial testing
+### Key Pages
+- `app/page.tsx` - Home/dashboard
+- `app/create/page.tsx` - Create CSG form
+- `app/group/[id]/page.tsx` - CSG details
+- `app/search/page.tsx` - Browse CSGs
 
-2. Backend:
-   - Install Haskell and Stack
-   - Set up PostgreSQL database
-   - Run stack build to compile
-   - Use stack run to start the server
+### Wallet Integration
+- `components/wallet-provider.tsx` - Lace wallet connection
+- Direct transaction signing through wallet
+- No backend authentication required
 
-3. Frontend:
-   - Install Node.js and npm
-   - Run 
-pm install in the frontend directory
-   - Use 
-pm start to run the development server
+## Development
+
+### Prerequisites
+- Docker & Docker Compose
+- Node.js 18+ (for local frontend development)
+- Git
+
+### Quick Start
+```bash
+git clone https://github.com/Josiah-O/thrift-crowd-staking
+cd thrift-crowd-staking
+docker-compose up --build
+```
+
+### Environment Variables
+```bash
+# Backend
+DATABASE_URL=postgresql://postgres:password@db:5432/thrift_crowd_staking
+BLOCKFROST_API_KEY=your_blockfrost_key
+CARDANO_NETWORK=preprod
+
+# Frontend  
+NEXT_PUBLIC_API_URL=http://localhost:8080
+```
 
 ## Deployment
-- Smart Contracts: Deploy to Cardano testnet/mainnet using Cardano CLI
-- Backend: Deploy to a cloud provider (e.g., AWS, Google Cloud)
-  - Use Docker for containerization
-  - Set up auto-scaling for high availability
-- Frontend: Deploy to a CDN (e.g., Cloudflare, AWS CloudFront)
-- Database: Use a managed PostgreSQL service (e.g., AWS RDS)
 
-## Testing
-- Smart Contracts: Use Plutus Playground and property-based testing
-- Backend: Use HSpec for unit testing, integration tests with mock blockchain
-- Frontend: Use Jest and React Testing Library for component testing
-- End-to-end testing: Use Cypress for full application flow testing
+### Docker Production
+```bash
+docker-compose -f docker-compose.yml up -d
+```
 
-## Security Considerations
-- Implement proper authentication and authorization using JWT
-- Use HTTPS for all API communications
-- Regularly audit smart contracts for vulnerabilities
-- Implement rate limiting on API endpoints
-- Use environment variables for sensitive information
-- Implement proper error handling to prevent information leakage
-- Regular security audits and penetration testing
+### Environment Setup
+- **Testnet**: Use `preprod` network for testing
+- **Mainnet**: Configure production Blockfrost keys
+- **Database**: PostgreSQL 13+
+- **Cardano Node**: Synced node for transaction submission
 
-## Monitoring and Logging
-- Use ELK stack (Elasticsearch, Logstash, Kibana) for centralized logging
-- Implement Prometheus and Grafana for system monitoring
-- Set up alerts for critical system events and errors
+## Database Schema
 
-## Scalability
-- Implement caching layer (e.g., Redis) for frequently accessed data
-- Use load balancing for backend services
-- Optimize database queries and implement indexing
-- Consider sharding for database scalability
+### Core Tables
+- `csgs` - CSG metadata and status
+- `csg_participants` - Participant stakes and addresses
+- `csg_transactions` - Transaction history
+- `csg_rewards` - Reward distribution records
 
-## Continuous Integration/Continuous Deployment (CI/CD)
-- Use GitHub Actions for automated testing and deployment
-- Implement staging environment for pre-production testing
-- Use blue-green deployment strategy for zero-downtime updates
+## Security
 
-## Backup and Disaster Recovery
-- Regular database backups
-- Implement multi-region redundancy for critical services
-- Develop and test disaster recovery plan
+### DApp Security Model
+- **No Backend Authentication** - Pure wallet-based access
+- **Smart Contract Validation** - All rules enforced on-chain
+- **Real Wallet Signatures** - Users sign transactions directly
+- **No Personal Data** - Only wallet addresses stored
 
-## Documentation
-- Maintain up-to-date API documentation (e.g., using Swagger)
-- Document all major components and their interactions
-- Keep a changelog for tracking system changes and updates
+### Operational Security
+- Environment variable management
+- HTTPS enforcement
+- Rate limiting on API endpoints
+- Input validation and sanitization
+
+## Monitoring
+
+### Key Metrics
+- CSG creation/participation rates
+- Staking delegation success rates
+- Transaction success/failure rates
+- Pool performance tracking
+
+### Logging
+- Structured logging with correlation IDs
+- Error tracking and alerting
+- Performance monitoring
+
+## Contributing
+
+### Development Workflow
+1. Fork repository
+2. Create feature branch
+3. Implement changes with tests
+4. Submit pull request
+5. Code review and merge
+
+### Code Standards
+- Haskell: HLint compliance
+- TypeScript: ESLint + Prettier
+- Documentation: Keep technical docs updated
+- Testing: Unit tests for core functions
+
+## License
+
+BSD-3-Clause - See LICENSE file for details

@@ -1,125 +1,158 @@
 # Thrift Crowd Staking
 
-Thrift Crowd Staking is a decentralized application (dApp) built on the Cardano blockchain that enables users to create and participate in Crowd Stake Groups (CSGs). This platform aims to provide financial inclusion and peer-to-peer lending opportunities, especially in regions with limited access to traditional banking services.
+> Decentralized Community Savings Groups on Cardano
+
+[![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](LICENSE)
+[![Cardano](https://img.shields.io/badge/Built%20on-Cardano-blue)](https://cardano.org/)
+[![Haskell](https://img.shields.io/badge/Backend-Haskell-purple)](https://www.haskell.org/)
+[![Next.js](https://img.shields.io/badge/Frontend-Next.js-black)](https://nextjs.org/)
+
+Thrift Crowd Staking enables trustless, permissionless Community Savings Groups (CSGs) on the Cardano blockchain. Users can create and participate in savings groups that automatically delegate to stake pools and distribute real staking rewards.
 
 ## Features
 
-- Create and manage Crowd Stake Groups
-- Join existing CSGs
-- Claim rewards from CSG participation
-- Transparent and secure transactions using Cardano blockchain
-- User-friendly interface for managing multiple CSGs
+- **🔐 Wallet-Only Authentication** - No KYC, no personal data, pure DApp
+- **💰 Real Cardano Staking** - Actual delegation to stake pools with real rewards
+- **⚖️ Load-Balanced Pool Selection** - Distributes CSGs across multiple top pools
+- **🔒 Smart Contract Enforcement** - All rules enforced on-chain
+- **🌐 Lace Wallet Integration** - Seamless connection and transaction signing
+- **📊 Transparent Operations** - All transactions visible on Cardano explorer
 
 ## Technology Stack
 
-- Smart Contracts: Plutus
-- Backend: Haskell (Servant)
-- Frontend: React with Redux
-- Database: PostgreSQL
-- Blockchain: Cardano (Testnet and Mainnet)
+- **Smart Contracts**: Plutus (integrated)
+- **Backend**: Haskell with Servant API
+- **Frontend**: Next.js 14 with TypeScript
+- **Database**: PostgreSQL
+- **Blockchain**: Cardano (preprod/mainnet)
+- **Wallet**: Lace integration
 
-## Getting Started
+## Quick Start
 
 ### Prerequisites
 
-- Cardano Node (latest version)
-- Haskell and Stack
-- Node.js and npm
-- PostgreSQL
-- Daedalus Wallet or Yoroi Wallet (Testnet and Mainnet versions)
+- Docker & Docker Compose
+- Lace Wallet browser extension
+- Blockfrost API key ([get one here](https://blockfrost.io))
 
 ### Installation
 
-1. Clone the repository:
-   \\\
-   git clone https://github.com/yourusername/thrift-crowd-staking.git
-   cd thrift-crowd-staking
-   \\\
+```bash
+# Clone the repository
+git clone https://github.com/Josiah-O/thrift-crowd-staking.git
+cd thrift-crowd-staking
 
-2. Set up the backend:
-   \\\
-   cd backend
-   stack build
-   stack run
-   \\\
+# Set environment variables
+export BLOCKFROST_API_KEY=your_blockfrost_api_key
+export CARDANO_NETWORK=preprod
 
-3. Set up the frontend:
-   \\\
-   cd frontend
-   npm install
-   npm start
-   \\\
+# Start the application
+docker-compose up --build
+```
 
-4. Deploy smart contracts (refer to the technical guide for detailed instructions)
+### Access the Application
 
-### Cardano Testnet Setup
+- **Frontend**: http://localhost:3000
+- **Backend API**: http://localhost:8080
+- **Database**: PostgreSQL on port 5432
 
-1. Install a Cardano Testnet Wallet:
-   - Daedalus Testnet: [Download here](https://daedaluswallet.io/en/testnet/)
-   - Yoroi Testnet: Available as a browser extension
+## Usage
 
-2. Create a new wallet in your chosen testnet wallet application.
+1. **Install Lace Wallet**: Get the [Lace browser extension](https://www.lace.io/)
+2. **Connect Wallet**: Click "Connect Wallet" and approve the connection
+3. **Create CSG**: Set up a new Community Savings Group
+4. **Join CSG**: Browse and participate in existing groups
+5. **Earn Rewards**: Receive real Cardano staking rewards
 
-3. Obtain Testnet ADA:
-   - Visit the [Cardano Testnet Faucet](https://developers.cardano.org/en/testnets/cardano/tools/faucet/)
-   - Enter your testnet wallet address
-   - Request testnet ADA (you can do this once per 24 hours)
+## Development
 
-4. Configure the application for testnet:
-   - In the backend configuration, ensure the Cardano node is pointing to the testnet.
-   - Update smart contract deployment scripts to use testnet parameters.
+### Environment Variables
 
-5. Testing transactions:
-   - Use your testnet wallet to interact with the dApp.
-   - Monitor transactions on the [Cardano Testnet Explorer](https://explorer.cardano-testnet.iohkdev.io/).
+```bash
+# Backend
+DATABASE_URL=postgresql://postgres:password@db:5432/thrift_crowd_staking
+BLOCKFROST_API_KEY=your_blockfrost_api_key
+CARDANO_NETWORK=preprod
 
-Note: Testnet ADA has no real-world value and is only for testing purposes.
+# Frontend
+NEXT_PUBLIC_API_URL=http://localhost:8080
+```
 
-### Cardano Mainnet Setup
+### Local Development
 
-1. Install a Cardano Mainnet Wallet:
-   - Daedalus: [Download here](https://daedaluswallet.io/)
-   - Yoroi: Available as a browser extension
+```bash
+# Backend
+cd backend
+stack build
+stack run
 
-2. Create a new wallet in your chosen mainnet wallet application.
+# Frontend  
+cd frontend
+npm install
+npm run dev
+```
 
-3. Obtain Mainnet ADA:
-   - Purchase ADA from a cryptocurrency exchange.
-   - Transfer the ADA to your mainnet wallet address.
+## API Endpoints
 
-4. Configure the application for mainnet:
-   - In the backend configuration, ensure the Cardano node is pointing to the mainnet.
-   - Update smart contract deployment scripts to use mainnet parameters.
-
-5. Mainnet transactions:
-   - Use your mainnet wallet to interact with the dApp.
-   - Monitor transactions on the [Cardano Explorer](https://explorer.cardano.org/en).
-
-Warning: Mainnet transactions involve real ADA with monetary value. Always double-check transactions before confirming.
+```
+GET  /api/health          - Health check
+POST /api/create-csg      - Create new CSG
+POST /api/join-csg/{id}   - Join existing CSG
+POST /api/claim-reward/{id} - Claim staking rewards
+POST /api/close-csg/{id}  - Close CSG
+GET  /api/list-csgs       - List active CSGs
+POST /api/withdraw/{id}   - Withdraw funds
+```
 
 ## Documentation
 
-- [Technical Guide](docs/technical_guide.md)
-- [UX Guide](docs/ux_guide.md)
-- [Task List](tasks.md)
+- [Technical Guide](docs/technical_guide.md) - Architecture and implementation details
+- [Cardano Configuration](docs/cardano-config.md) - Environment and network setup
 
 ## Contributing
 
-Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
+We welcome contributions! Please follow these steps:
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+### Code Standards
+
+- **Haskell**: Follow HLint recommendations
+- **TypeScript**: Use ESLint + Prettier
+- **Documentation**: Update docs for any changes
+- **Testing**: Include tests for new features
+
+## Roadmap
+
+- [ ] GitHub project management board
+- [ ] Multi-signature wallet support
+- [ ] Mobile wallet integration
+- [ ] Governance token implementation
+- [ ] Advanced analytics dashboard
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
+This project is licensed under the BSD 3-Clause License - see the [LICENSE](LICENSE) file for details.
+
+## Support
+
+- **Issues**: [GitHub Issues](https://github.com/Josiah-O/thrift-crowd-staking/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/Josiah-O/thrift-crowd-staking/discussions)
+- **Email**: buildwithjosiah@gmail.com
+- **Twitter**: [@Real_dev0](https://twitter.com/Real_dev0)
 
 ## Acknowledgments
 
-- Cardano Foundation
-- IOHK
-- Emurgo
+- [Cardano Foundation](https://cardanofoundation.org/)
+- [IOG](https://iohk.io/)
+- [Emurgo](https://emurgo.io/)
+- [Lace Wallet](https://www.lace.io/)
+- [Blockfrost](https://blockfrost.io/)
 
-## Contact
+---
 
-For any queries or support, please contact:
-
-- Email: buildwithjosiah@gmail.com
-- X (Twitter): @Real_dev0
+**Built with ❤️ on Cardano**

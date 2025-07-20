@@ -9,6 +9,7 @@
 
 module CSGContract where
 
+-- Unique deployment identifier: Josh-2025-07-17-Fresh-Deploy
 import           PlutusTx.Prelude
 import qualified PlutusTx
 import           Ledger               hiding (singleton)
@@ -22,6 +23,7 @@ data CSGDatum = CSGDatum
     { csgOwner         :: PubKeyHash
     , csgParticipants  :: [PubKeyHash]
     , csgTotalStake    :: Integer
+    , csgMinStake      :: Integer  -- Minimum stake amount set by creator
     , csgDuration      :: POSIXTime
     , csgStartTime     :: POSIXTime
     }
@@ -40,17 +42,18 @@ mkValidator dat red ctx =
 
 validateJoin :: CSGDatum -> ScriptContext -> Bool
 validateJoin dat ctx = 
-    traceIfFalse "Incorrect stake amount" correctStakeAmount &&
+    traceIfFalse "Insufficient stake amount" sufficientStakeAmount &&
     traceIfFalse "CSG is full" (length (csgParticipants dat) < 10)
   where
     info :: TxInfo
     info = scriptContextTxInfo ctx
 
-    correctStakeAmount :: Bool
-    correctStakeAmount = 
+    sufficientStakeAmount :: Bool
+    sufficientStakeAmount = 
         let inVal  = valueSpent info
             outVal = valueProduced info
-        in outVal == inVal <> Ada.lovelaceValueOf 100_000_000  -- 100 ADA stake
+            stakeAdded = Ada.getLovelace (Ada.fromValue (outVal <> negate inVal))
+        in stakeAdded >= csgMinStake dat  -- Check against configurable minimum
 
 validateClaim :: CSGDatum -> ScriptContext -> Bool
 validateClaim dat ctx =

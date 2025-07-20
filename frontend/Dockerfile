@@ -1,24 +1,22 @@
-FROM node:16
+FROM node:18-alpine
 
 WORKDIR /app
 
-# Copy package.json and package-lock.json (if available)
-COPY package*.json ./
+# Copy package files
+COPY package.json pnpm-lock.yaml* ./
 
-# Copy tailwind.config.js
-COPY tailwind.config.js ./
+# Install dependencies
+RUN npm install -g pnpm
+RUN pnpm install
 
-# Clear npm cache and install dependencies
-RUN npm cache clean --force
-RUN npm install
-
-# Copy the rest of the application code
+# Copy source code
 COPY . .
 
 # Build the application
-RUN npm install
-RUN npm run build
+RUN pnpm build
 
+# Expose port
 EXPOSE 3000
 
-CMD ["npm", "start"]
+# Start the application
+CMD ["pnpm", "start"] 

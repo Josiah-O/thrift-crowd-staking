@@ -2,23 +2,34 @@ name: thrift-crowd-staking
 version: 0.1.0.0
 github: "Josiah-O/thrift-crowd-staking"
 license: BSD3
-author: "Josiah Odosu"
+author: "Josiah"
 maintainer: "buildwithjosiah@gmail.com"
-copyright: "2024 Josiah Odosu"
+copyright: "2025 Josiah"
 
 description: Please see the README on GitHub at <https://github.com/Josiah-O/thrift-crowd-staking#readme>
 
 dependencies:
 - base >= 4.7 && < 5
+- text
 - aeson
 - servant-server
 - wai
 - warp
-- text
-- time
-- random
 - postgresql-simple
+- mtl
+- time
+- hashable
 - uuid
+- http-client
+- http-client-tls
+- http-types
+- bytestring
+- http-api-data
+- process
+- temporary
+- filepath
+- containers
+- thrift-crowd-staking-contracts
 
 library:
   source-dirs: src
@@ -34,5 +45,13 @@ executables:
     dependencies:
     - thrift-crowd-staking
 
-packages:
-- .
+# tests:
+#   thrift-crowd-staking-test:
+#     main: Spec.hs
+#     source-dirs: test
+#     ghc-options:
+#     - -threaded
+#     - -rtsopts
+#     - -with-rtsopts=-N
+#     dependencies:
+#     - thrift-crowd-staking
