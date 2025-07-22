@@ -1,0 +1,54 @@
+MIT License
+
+Copyright (c) 2024 Thrift Crowd Staking Project
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+ADDITIONAL DISCLAIMERS:
+
+CRYPTOCURRENCY AND BLOCKCHAIN DISCLAIMER:
+This software involves interaction with cryptocurrency, blockchain technology,
+and smart contracts. The use of this software carries inherent risks including
+but not limited to:
+- Loss of funds due to smart contract bugs or vulnerabilities
+- Network failures or blockchain reorganizations
+- Private key loss or compromise
+- Regulatory changes affecting cryptocurrency use
+- Market volatility and financial losses
+
+NO LIABILITY FOR FINANCIAL LOSSES:
+The authors and contributors of this software shall not be liable for any
+financial losses, including but not limited to loss of cryptocurrency, tokens,
+or any other digital assets that may result from the use of this software.
+
+SMART CONTRACT RISKS:
+Smart contracts are experimental technology. Users acknowledge that smart
+contracts may contain bugs, vulnerabilities, or may not function as intended.
+The authors make no guarantees about the security, functionality, or
+reliability of any smart contracts included in this software.
+
+USE AT YOUR OWN RISK:
+By using this software, you acknowledge that you understand the risks involved
+and that you are using the software entirely at your own risk. You are
+responsible for your own due diligence and for taking appropriate precautions
+to protect your assets and data.
+
+REGULATORY COMPLIANCE:
+Users are solely responsible for ensuring their use of this software complies
+with all applicable laws and regulations in their jurisdiction. 
